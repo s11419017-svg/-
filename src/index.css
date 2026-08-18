@@ -1,0 +1,167 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px;
+  }
+
+  :root {
+    --bg-dark: #1a1a1c;
+    --text-light: #f5f5f4;
+    --navy-blue: #2b3a4a;
+    --brick-red: #8c2d2d;
+    --gold-accent: #c4a77d;
+  }
+
+  body {
+    background-color: #1a1a1c;
+    color: #f5f5f4;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+  ::selection {
+    background-color: #8c2d2d;
+    color: #ffffff;
+  }
+}
+
+/* Fixed Ultra-Fast GPU-Accelerated Background Canvas (Zero-repaint radial gradients) */
+#bg-canvas-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: 
+    radial-gradient(circle at 50% 0%, rgba(43, 58, 74, 0.28) 0%, transparent 65%),
+    radial-gradient(circle at 85% 85%, rgba(140, 45, 45, 0.15) 0%, transparent 55%),
+    #1a1a1c;
+  transform: translateZ(0);
+}
+
+/* Mobile & Touch Ergonomics Optimization */
+html, body {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+button, a, input, select, textarea, [role="button"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, [role="button"] {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Smooth Touch Momentum Scrolling for Drawers and Modals */
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+  over-scroll-behavior: contain;
+}
+
+/* Touch Active Response & Minimum Target Size Utilities */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.touch-active {
+  transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.15s ease;
+}
+
+.touch-active:active {
+  transform: scale(0.94);
+  opacity: 0.88;
+}
+
+/* Front-end Performance Optimization Utilities */
+.content-visibility-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 700px;
+}
+
+.gpu-accelerated {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.font-cinzel {
+  font-family: 'Cinzel', 'Noto Serif TC', serif;
+}
+
+.font-serif-tc {
+  font-family: 'Noto Serif TC', 'Cormorant Garamond', serif;
+}
+
+.font-garamond {
+  font-family: 'Cormorant Garamond', 'Noto Serif TC', serif;
+}
+
+/* High-Performance Smoked Card (Replaced GPU-heavy backdrop-blur with opaque contrast) */
+.smoked-card {
+  background: rgba(22, 22, 24, 0.95);
+  border: 1px solid rgba(245, 245, 244, 0.08);
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.4);
+}
+
+.smoked-card-hover {
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  will-change: transform;
+}
+
+.smoked-card-hover:hover {
+  border-color: rgba(140, 45, 45, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -8px rgba(140, 45, 45, 0.2);
+}
+
+/* Vintage Paper Ticket Texture (Optimized without SVG noise filter) */
+.ticket-paper {
+  background-color: #f4efdf;
+  color: #1c1917;
+  background-image: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.03) 0%, transparent 80%);
+}
+
+/* Print Styles for Ticket Printing */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-ticket, #printable-ticket * {
+    visibility: visible;
+  }
+  #printable-ticket {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 20px;
+    box-shadow: none;
+    background-color: #fff !important;
+    color: #000 !important;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #121214;
+}
+::-webkit-scrollbar-thumb {
+  background: #2b3a4a;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #8c2d2d;
+}

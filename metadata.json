@@ -1,0 +1,6 @@
+{
+  "name": "慈大附中高三英文公演《悲慘世界》",
+  "description": "2026 慈大附中高二知足班（雙語班）表演英文公演《悲慘世界》（Les Misérables）官方宣傳與演職介紹網頁",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
