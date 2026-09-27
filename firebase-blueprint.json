@@ -1,0 +1,41 @@
+{
+  "entities": {
+    "showData": {
+      "title": "Show Data",
+      "description": "Live production data including cast members, rehearsal photos, musical tracks, and general show configuration",
+      "type": "object",
+      "properties": {
+        "cast": {
+          "type": "array",
+          "description": "List of cast and crew members"
+        },
+        "photos": {
+          "type": "array",
+          "description": "List of rehearsal and stage photos"
+        },
+        "tracks": {
+          "type": "array",
+          "description": "List of musical tracks and audio info"
+        },
+        "generalConfig": {
+          "type": "object",
+          "description": "Show-wide general configuration such as dates, ticketing, venue, and taglines"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of last update"
+        },
+        "updatedBy": {
+          "type": "string",
+          "description": "Identifier of updater"
+        }
+      }
+    }
+  },
+  "firestore": {
+    "/show_production/{docId}": {
+      "schema": "showData",
+      "description": "Master synchronized show configuration and asset document"
+    }
+  }
+}

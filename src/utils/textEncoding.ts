@@ -20,7 +20,7 @@ const REPLACEMENT_CHAR_REGEX = /\uFFFD/;
 // ASCII control characters except \t (tab), \n (newline), \r (carriage return)
 const ILLEGAL_CONTROL_CHARS_REGEX = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/;
 // Common Windows-1252 / ISO-8859-1 mojibake signature patterns
-const MOJIBAKE_PATTERNS = /(?:Ã[\x80-\xBF]|â[\x80-\xBF]{2}|ï¿½|)/;
+const MOJIBAKE_PATTERNS = /(?:Ã[\x80-\xBF]|â[\x80-\xBF]{2}|ï¿½)/;
 
 /**
  * Validates text string for encoding anomalies, replacement characters, control chars, or mojibake.
@@ -167,31 +167,47 @@ export function createSafeUtf8TextBlob(text: string): Blob {
 }
 
 /**
- * Safely encodes a JavaScript object to a URL-safe sharing string
- * using JSON -> encodeURIComponent -> Base64 or URI component.
+ * Safely encodes a JavaScript object to a base64 sharing string
+ * using standard TextEncoder and byte conversion.
  * Prevents any URI malformed errors or corrupted Chinese characters.
  */
 export function safeEncodeSharePayload(data: any): string {
   const sanitized = sanitizeObjectToUtf8(data);
   const jsonString = JSON.stringify(sanitized);
-  // First URI-encode the UTF-8 bytes to percent sequences, then convert to base64
-  const utf8Bytes = encodeURIComponent(jsonString).replace(/%([0-9A-F]{2})/g, (_, p1) => {
-    return String.fromCharCode(parseInt(p1, 16));
-  });
-  return btoa(utf8Bytes);
+  const bytes = new TextEncoder().encode(jsonString);
+  let binary = '';
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
 }
 
 /**
  * Safely decodes a URL share payload back into an object
- * using Base64 -> decodeURIComponent.
+ * supporting both modern TextDecoder and legacy percent-encoded formats.
  */
 export function safeDecodeSharePayload<T = any>(payload: string): T {
   try {
-    const rawBinary = atob(payload.trim());
-    const percentEncoded = Array.prototype.map
-      .call(rawBinary, (c: string) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-      .join('');
-    const jsonString = decodeURIComponent(percentEncoded);
+    const cleanPayload = payload.trim();
+    const rawBinary = atob(cleanPayload);
+    let jsonString: string;
+
+    try {
+      // Modern fast path: TextDecoder
+      const bytes = new Uint8Array(rawBinary.length);
+      for (let i = 0; i < rawBinary.length; i++) {
+        bytes[i] = rawBinary.charCodeAt(i);
+      }
+      jsonString = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    } catch {
+      // Fallback path: legacy percent-encoded format
+      const percentEncoded = Array.prototype.map
+        .call(rawBinary, (c: string) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('');
+      jsonString = decodeURIComponent(percentEncoded);
+    }
+
     const parsed = JSON.parse(jsonString);
     return sanitizeObjectToUtf8(parsed);
   } catch (err) {
@@ -236,4 +252,60 @@ export function readUploadedJsonFile(file: File): Promise<any> {
     // Explicitly read as UTF-8 encoding
     reader.readAsText(file, 'UTF-8');
   });
+}
+
+/**
+ * Standard RFC 4180 compliant CSV parser.
+ * Handles embedded quotes, escaped quotes (""), commas within quotes,
+ * multiline cells, UTF-8 BOM, and both CRLF and LF linebreaks.
+ */
+export function parseRFC4180CSV(text: string): string[][] {
+  if (!text) return [];
+
+  const rows: string[][] = [];
+  let currentRow: string[] = [];
+  let currentCell = '';
+  let inQuotes = false;
+
+  // Strip UTF-8 BOM if present
+  const cleanText = text.replace(/^\uFEFF/, '');
+
+  for (let i = 0; i < cleanText.length; i++) {
+    const ch = cleanText[i];
+    const nextCh = cleanText[i + 1];
+
+    if (ch === '"') {
+      if (inQuotes && nextCh === '"') {
+        currentCell += '"';
+        i++; // skip escaped quote
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (ch === ',' && !inQuotes) {
+      currentRow.push(currentCell.trim());
+      currentCell = '';
+    } else if ((ch === '\r' || ch === '\n') && !inQuotes) {
+      if (ch === '\r' && nextCh === '\n') {
+        i++; // skip \n of \r\n
+      }
+      currentRow.push(currentCell.trim());
+      currentCell = '';
+      if (currentRow.some((col) => col.length > 0)) {
+        rows.push(currentRow);
+      }
+      currentRow = [];
+    } else {
+      currentCell += ch;
+    }
+  }
+
+  // Push final cell/row if exists
+  if (currentCell.length > 0 || currentRow.length > 0) {
+    currentRow.push(currentCell.trim());
+    if (currentRow.some((col) => col.length > 0)) {
+      rows.push(currentRow);
+    }
+  }
+
+  return rows;
 }

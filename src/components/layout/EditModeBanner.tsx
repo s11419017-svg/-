@@ -1,6 +1,8 @@
-import React from 'react';
-import { Info, HelpCircle, ShieldAlert, Sparkles, X } from 'lucide-react';
+import React, { useState, memo } from 'react';
+import { Info, HelpCircle, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { MagneticWrapper } from '../ui/MagneticWrapper';
+import { FocusEditModeToggle } from '../common/FocusEditModeToggle';
 
 interface EditModeBannerProps {
   isEditMode: boolean;
@@ -8,64 +10,87 @@ interface EditModeBannerProps {
   onOpenQuickGuide?: () => void;
 }
 
-export const EditModeBanner: React.FC<EditModeBannerProps> = ({
+export const EditModeBanner: React.FC<EditModeBannerProps> = memo(({
   isEditMode,
   onExitEditMode,
   onOpenQuickGuide,
 }) => {
+  const [showMobileTip, setShowMobileTip] = useState(false);
+
   if (!isEditMode) return null;
 
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, y: -40 }}
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -40 }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
-        className="sticky top-16 sm:top-20 z-40 bg-gradient-to-r from-[#2a1717] via-[#3d1818] to-[#241515] border-y border-amber-500/50 shadow-2xl px-4 py-3 text-stone-200"
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.25, ease: 'easeOut' }}
+        className="sticky top-14 sm:top-20 z-40 bg-gradient-to-r from-[#241212] via-[#351515] to-[#1f0f0f] border-y border-amber-500/50 shadow-2xl px-3 sm:px-4 py-2 sm:py-3 text-stone-200 backdrop-blur-md"
       >
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
-          {/* Left notice */}
-          <div className="flex items-start gap-3">
-            <div className="p-1.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 shrink-0 mt-0.5 md:mt-0">
-              <Info className="w-4 h-4" />
-            </div>
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-bold text-amber-200 font-sans tracking-wide">
-                  演職資料維護與即時編輯模式已開啟
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-2 sm:gap-3 text-xs">
+          {/* Top / Left Section */}
+          <div className="flex items-center justify-between w-full md:w-auto gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="p-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 shrink-0">
+                <Info className="w-3.5 h-3.5" />
+              </div>
+              <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                <span className="font-bold text-amber-200 font-sans text-[11px] sm:text-xs truncate">
+                  演職資料編輯模式中
                 </span>
-                <span className="px-2 py-0.5 rounded bg-[#8c2d2d] text-white text-[10px] font-mono font-bold tracking-wider">
-                  DEMO PLACEHOLDER
+                <span className="px-1.5 py-0.2 rounded bg-[#8c2d2d] text-white text-[9px] sm:text-[10px] font-mono font-bold">
+                  DEMO
                 </span>
               </div>
-              <p className="text-stone-300/90 leading-relaxed font-sans text-[11px]">
-                💡 <strong className="text-amber-100">特別說明：</strong>目前網站上的示範相片、感言引言皆為<strong>暫時代理樣板（Placeholder）</strong>，方便預覽舞台視覺版型。各位老師、導演與同學們可隨時點擊卡片旁的「編輯」或「換照片」置換為班級真實資料，不用擔心直接發布！
-              </p>
             </div>
+
+            {/* Mobile Expand Tip Button */}
+            <button
+              onClick={() => setShowMobileTip(!showMobileTip)}
+              className="md:hidden text-[10px] text-amber-300/80 hover:text-amber-200 flex items-center gap-0.5 px-2 py-1 rounded bg-stone-900/60 border border-stone-800 shrink-0"
+            >
+              <span>{showMobileTip ? '收起' : '提示'}</span>
+              {showMobileTip ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </button>
           </div>
 
-          {/* Right actions */}
-          <div className="flex items-center gap-2.5 shrink-0 self-end md:self-center">
+          {/* Collapsible / Desktop Notice text */}
+          <div className={`${showMobileTip ? 'block' : 'hidden'} md:block flex-1 max-w-2xl px-1`}>
+            <p className="text-stone-300/90 leading-relaxed font-sans text-[10px] sm:text-[11px]">
+              💡 <strong className="text-amber-100">特別說明：</strong>示範照片與心得為<strong>暫時樣板</strong>，點擊卡片旁的「換照/編輯」即可置換為真實資料。
+            </p>
+          </div>
+
+          {/* Right Action Controls */}
+          <div className="flex items-center gap-2 shrink-0 w-full md:w-auto justify-end pt-1 md:pt-0 border-t md:border-t-0 border-stone-800/60">
+            <FocusEditModeToggle />
             {onOpenQuickGuide && (
-              <button
-                onClick={onOpenQuickGuide}
-                className="px-3 py-1.5 rounded bg-stone-900/80 hover:bg-stone-800 border border-amber-500/40 text-amber-200 hover:text-white transition-colors text-xs font-sans flex items-center gap-1.5"
-              >
-                <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
-                <span>樣板說明與指引</span>
-              </button>
+              <MagneticWrapper strength={0.2}>
+                <button
+                  onClick={onOpenQuickGuide}
+                  className="hidden sm:flex px-2.5 py-1 rounded bg-stone-900/80 hover:bg-stone-800 border border-amber-500/40 text-amber-200 text-[11px] font-sans items-center gap-1 cursor-pointer"
+                >
+                  <HelpCircle className="w-3 h-3 text-amber-400" />
+                  <span>指引</span>
+                </button>
+              </MagneticWrapper>
             )}
-            <button
-              onClick={onExitEditMode}
-              className="px-3.5 py-1.5 rounded bg-[#8c2d2d] hover:bg-[#a63535] text-white font-bold transition-all text-xs font-sans shadow flex items-center gap-1"
-            >
-              <X className="w-3.5 h-3.5" />
-              <span>退出編輯模式</span>
-            </button>
+            <MagneticWrapper strength={0.2}>
+              <button
+                onClick={onExitEditMode}
+                className="px-3 py-1 rounded bg-[#8c2d2d] hover:bg-[#a63535] text-white font-bold transition-all text-[11px] font-sans shadow flex items-center gap-1 cursor-pointer touch-manipulation"
+              >
+                <X className="w-3 h-3" />
+                <span>退出編輯</span>
+              </button>
+            </MagneticWrapper>
           </div>
         </div>
       </motion.div>
     </AnimatePresence>
   );
-};
+});
+
+EditModeBanner.displayName = 'EditModeBanner';
+

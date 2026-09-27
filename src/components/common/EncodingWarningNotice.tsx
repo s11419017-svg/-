@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, Sparkles, Check, Info } from 'lucide-react';
+import { AlertTriangle, Sparkles, Info } from 'lucide-react';
 import { EncodingCheckResult } from '../../utils/textEncoding';
 
 interface EncodingWarningNoticeProps {

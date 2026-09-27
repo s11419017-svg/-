@@ -1,43 +1,57 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { ArrowUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ambientSynth } from '../../utils/audioSynth';
+import { rafThrottle } from '../../utils/throttle';
 
-export const ScrollToTopButton: React.FC = () => {
+export const ScrollToTopButton: React.FC = memo(() => {
   const [isVisible, setIsVisible] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
-    let ticking = false;
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-          const currentScroll = window.scrollY;
-          
-          if (totalHeight > 0) {
-            const progress = Math.min(Math.max((currentScroll / totalHeight) * 100, 0), 100);
-            setScrollProgress(progress);
-          }
-          
-          setIsVisible(currentScroll > 400);
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
+    let lastProgress = -1;
+    let lastVisible = false;
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    const throttledScroll = rafThrottle(() => {
+      if (typeof document === 'undefined' || typeof window === 'undefined') return;
+      const docEl = document.documentElement;
+      const totalHeight = (docEl?.scrollHeight ?? 0) - window.innerHeight;
+      const currentScroll = window.scrollY || 0;
+
+      if (totalHeight > 0) {
+        const progress = Math.round(Math.min(Math.max((currentScroll / totalHeight) * 100, 0), 100));
+        if (progress !== lastProgress) {
+          lastProgress = progress;
+          setScrollProgress(progress);
+        }
+      }
+
+      const visible = currentScroll > 400;
+      if (visible !== lastVisible) {
+        lastVisible = visible;
+        setIsVisible(visible);
+      }
+    });
+
+    window.addEventListener('scroll', throttledScroll, { passive: true });
+    // Initial run
+    throttledScroll();
+
+    return () => {
+      throttledScroll.cancel();
+      window.removeEventListener('scroll', throttledScroll);
+    };
   }, []);
 
-  const scrollToTop = () => {
+  const scrollToTop = useCallback(() => {
     ambientSynth.playButtonClickSFX();
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
-  };
+    if (typeof window !== 'undefined') {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+    }
+  }, []);
 
   return (
     <AnimatePresence>
@@ -48,7 +62,7 @@ export const ScrollToTopButton: React.FC = () => {
           exit={{ opacity: 0, scale: 0.8, y: 20 }}
           transition={{ duration: 0.25 }}
           onClick={scrollToTop}
-          className="fixed bottom-24 left-5 z-40 group flex items-center justify-center w-11 h-11 rounded-full bg-[#1a1a1c]/90 hover:bg-[#8c2d2d] text-stone-300 hover:text-white border border-stone-700/80 hover:border-amber-400 shadow-2xl transition-all duration-300 cursor-pointer select-none"
+          className="fixed bottom-[calc(max(1rem,env(safe-area-inset-bottom,0px))+3.25rem)] sm:bottom-24 left-3 sm:left-5 z-40 group flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-[#1a1a1c]/90 hover:bg-[#8c2d2d] text-stone-300 hover:text-white border border-stone-700/80 hover:border-amber-400 shadow-2xl transition-all duration-300 cursor-pointer select-none touch-manipulation"
           title={`返回頂部 (${Math.round(scrollProgress)}%)`}
           aria-label="Scroll to top"
         >
@@ -77,4 +91,6 @@ export const ScrollToTopButton: React.FC = () => {
       )}
     </AnimatePresence>
   );
-};
+});
+
+ScrollToTopButton.displayName = 'ScrollToTopButton';

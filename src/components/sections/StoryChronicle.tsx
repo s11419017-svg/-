@@ -109,6 +109,9 @@ export const StoryChronicleDrawer: React.FC<StoryChronicleDrawerProps> = ({ isOp
 
           {/* Slide-Over Drawer Panel (Hardware Accelerated) */}
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="story-chronicle-title"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
@@ -119,14 +122,14 @@ export const StoryChronicleDrawer: React.FC<StoryChronicleDrawerProps> = ({ isOp
             <div className="p-4 sm:p-6 bg-[#211b17] border-b border-stone-800 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-[#8c2d2d]/30 border border-[#8c2d2d] text-amber-300 flex items-center justify-center shrink-0">
-                  <BookOpen className="w-5 h-5" />
+                  <BookOpen className="w-5 h-5" aria-hidden="true" />
                 </div>
                 <div>
                   <div className="inline-flex items-center gap-1.5 text-[10px] font-sans tracking-[0.2em] text-amber-400 uppercase font-bold">
-                    <Feather className="w-3 h-3 text-[#8c2d2d]" />
+                    <Feather className="w-3 h-3 text-[#8c2d2d]" aria-hidden="true" />
                     <span>Story Chronicle & Historical Guide</span>
                   </div>
-                  <h3 className="font-cinzel text-lg sm:text-xl font-bold text-[#f5f5f4] tracking-tight">
+                  <h3 id="story-chronicle-title" className="font-cinzel text-lg sm:text-xl font-bold text-[#f5f5f4] tracking-tight">
                     《悲慘世界》故事大綱與歷史篇章導讀
                   </h3>
                 </div>
@@ -136,16 +139,16 @@ export const StoryChronicleDrawer: React.FC<StoryChronicleDrawerProps> = ({ isOp
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => ambientSynth.playPageFlipSFX()}
-                  className="p-2 rounded-full hover:bg-stone-800 text-stone-400 hover:text-amber-300 transition-colors hidden sm:flex items-center gap-1 text-xs font-sans"
-                  title="試聽翻頁擬真聲效"
+                  className="p-2 rounded-full hover:bg-stone-800 text-stone-300 hover:text-amber-300 transition-colors hidden sm:flex items-center gap-1 text-xs font-sans focus-visible:ring-2 focus-visible:ring-amber-400"
+                  aria-label="試聽紙張翻頁擬真音效"
                 >
-                  <Volume2 className="w-4 h-4 text-amber-400" />
-                  <span className="text-[11px] text-stone-400">紙張音效</span>
+                  <Volume2 className="w-4 h-4 text-amber-400" aria-hidden="true" />
+                  <span className="text-[11px] text-stone-300">紙張音效</span>
                 </button>
                 <button
                   onClick={onClose}
-                  className="p-2 rounded-full bg-stone-800/80 hover:bg-[#8c2d2d] text-stone-300 hover:text-white transition-all border border-stone-700"
-                  aria-label="Close drawer"
+                  className="p-2 rounded-full bg-stone-800/80 hover:bg-[#8c2d2d] text-stone-300 hover:text-white transition-all border border-stone-700 focus-visible:ring-2 focus-visible:ring-amber-400"
+                  aria-label="關閉故事篇章導讀視窗 (Esc)"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -153,21 +156,24 @@ export const StoryChronicleDrawer: React.FC<StoryChronicleDrawerProps> = ({ isOp
             </div>
 
             {/* Quick Chapter Selector Bar */}
-            <div className="px-4 py-2 bg-[#1a1512] border-b border-stone-800/80 flex items-center gap-1.5 overflow-x-auto scrollbar-thin shrink-0">
-              <span className="text-[11px] font-sans text-amber-400/80 font-bold tracking-wider shrink-0 mr-1">
+            <div className="px-4 py-2 bg-[#1a1512] border-b border-stone-800/80 flex items-center gap-1.5 overflow-x-auto scrollbar-thin shrink-0" role="tablist" aria-label="章節選擇分頁">
+              <span className="text-[11px] font-sans text-amber-400/90 font-bold tracking-wider shrink-0 mr-1">
                 章節選擇：
               </span>
               {BOOK_PAGES.map((page, idx) => (
                 <button
                   key={page.pageNumber}
+                  role="tab"
+                  aria-selected={currentPageIndex === idx}
+                  aria-label={`切換至第 ${page.pageNumber} 頁：${page.chapterTitleZh}`}
                   onClick={() => handleSelectChapter(idx)}
-                  className={`px-3 py-1 text-xs font-serif-tc font-bold rounded-sm transition-all whitespace-nowrap flex items-center gap-1 border ${
+                  className={`px-3 py-1 text-xs font-serif-tc font-bold rounded-sm transition-all whitespace-nowrap flex items-center gap-1 border focus-visible:ring-2 focus-visible:ring-amber-400 ${
                     currentPageIndex === idx
                       ? 'bg-[#8c2d2d] text-amber-100 border-amber-400/60 shadow-md'
-                      : 'bg-[#261f1a] text-stone-400 hover:text-stone-200 border-stone-800'
+                      : 'bg-[#261f1a] text-stone-300 hover:text-white border-stone-800'
                   }`}
                 >
-                  <Bookmark className={`w-3 h-3 ${currentPageIndex === idx ? 'text-amber-300' : 'text-stone-500'}`} />
+                  <Bookmark className={`w-3 h-3 ${currentPageIndex === idx ? 'text-amber-300' : 'text-stone-400'}`} aria-hidden="true" />
                   <span>{page.chapterTitleEn}</span>
                 </button>
               ))}
@@ -271,12 +277,13 @@ export const StoryChronicleDrawer: React.FC<StoryChronicleDrawerProps> = ({ isOp
                               <div className="aspect-[16/10] rounded-sm overflow-hidden border border-[#d6c7a7] shadow-md relative bg-stone-900">
                                 <img
                                   src={currentPage.illustrationUrl}
-                                  alt={currentPage.chapterTitleZh}
+                                  alt={currentPage.illustrationCaption ? `《悲慘世界》${currentPage.chapterTitleZh}插圖：${currentPage.illustrationCaption}` : `《悲慘世界》${currentPage.chapterTitleZh}歷史經典插圖`}
+                                  referrerPolicy="no-referrer"
                                   className="w-full h-full object-cover sepia-[0.35] contrast-105"
                                 />
                               </div>
                               {currentPage.illustrationCaption && (
-                                <p className="text-[11px] font-serif-tc text-stone-600 text-center italic">
+                                <p className="text-[11px] font-serif-tc text-stone-700 text-center italic font-medium">
                                   ▲ {currentPage.illustrationCaption}
                                 </p>
                               )}
@@ -285,7 +292,7 @@ export const StoryChronicleDrawer: React.FC<StoryChronicleDrawerProps> = ({ isOp
 
                           <div className="p-3 bg-[#e6ddc5] border border-[#d6c7a7] rounded-sm space-y-1 shadow-inner">
                             <div className="flex items-center gap-1.5 text-xs font-sans font-bold text-[#8c2d2d] uppercase tracking-wider">
-                              <Sparkles className="w-3.5 h-3.5" />
+                              <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
                               <span>雨果原著歷史背景</span>
                             </div>
                             <p className="text-xs font-serif-tc text-stone-800 leading-relaxed">
@@ -299,26 +306,28 @@ export const StoryChronicleDrawer: React.FC<StoryChronicleDrawerProps> = ({ isOp
                           <button
                             onClick={handlePrevPage}
                             disabled={currentPageIndex === 0}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-sm font-sans text-xs font-bold transition-all ${
+                            aria-label="閱讀上一頁篇章"
+                            className={`flex items-center gap-1 px-3 py-1.5 rounded-sm font-sans text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
                               currentPageIndex === 0
-                                ? 'opacity-30 cursor-not-allowed text-stone-400'
-                                : 'bg-[#e6ddc5] text-stone-800 hover:bg-[#8c2d2d] hover:text-white border border-[#d6c7a7]'
+                                ? 'opacity-30 cursor-not-allowed text-stone-500'
+                                : 'bg-[#e6ddc5] text-stone-900 hover:bg-[#8c2d2d] hover:text-white border border-[#d6c7a7]'
                             }`}
                           >
                             <ChevronLeft className="w-4 h-4" />
                             <span>上一頁</span>
                           </button>
 
-                          <div className="text-xs font-serif-tc font-bold text-stone-600">
+                          <div className="text-xs font-serif-tc font-bold text-stone-800">
                             第 {currentPage.pageNumber} / {BOOK_PAGES.length} 頁
                           </div>
 
                           <button
                             onClick={handleNextPage}
                             disabled={currentPageIndex === BOOK_PAGES.length - 1}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-sm font-sans text-xs font-bold transition-all ${
+                            aria-label="閱讀下一頁篇章"
+                            className={`flex items-center gap-1 px-3 py-1.5 rounded-sm font-sans text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-amber-500 ${
                               currentPageIndex === BOOK_PAGES.length - 1
-                                ? 'opacity-30 cursor-not-allowed text-stone-400'
+                                ? 'opacity-30 cursor-not-allowed text-stone-500'
                                 : 'bg-[#8c2d2d] text-white hover:bg-[#a13535] shadow-md'
                             }`}
                           >
@@ -340,24 +349,4 @@ export const StoryChronicleDrawer: React.FC<StoryChronicleDrawerProps> = ({ isOp
   );
 };
 
-// Compact Floating Side Trigger Button Component
-export const StoryChronicleTrigger: React.FC<{ onOpen: () => void }> = ({ onOpen }) => {
-  return (
-    <motion.button
-      whileHover={{ scale: 1.05, x: -3 }}
-      whileTap={{ scale: 0.92 }}
-      onClick={() => {
-        ambientSynth.playPageFlipSFX();
-        onOpen();
-      }}
-      className="fixed right-0 top-1/2 -translate-y-1/2 z-40 bg-[#8c2d2d] text-amber-100 hover:text-white px-3 py-4 rounded-l-md border-l-2 border-y border-amber-500/60 shadow-[0_0_20px_rgba(140,45,45,0.6)] flex flex-col items-center justify-center gap-2 transition-all group min-w-[44px] touch-active select-none cursor-pointer transform-gpu"
-      title="開啟《悲慘世界》故事大綱與歷史篇章導讀"
-    >
-      <BookOpen className="w-4.5 h-4.5 text-amber-300 group-hover:rotate-12 transition-transform" />
-      <span className="[writing-mode:vertical-lr] text-xs font-serif-tc tracking-widest font-bold">
-        故事篇章大綱
-      </span>
-      <ArrowRight className="w-3.5 h-3.5 text-amber-300 rotate-180" />
-    </motion.button>
-  );
-};
+export default StoryChronicleDrawer;

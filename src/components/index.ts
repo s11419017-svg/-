@@ -1,8 +1,16 @@
+// Effects Components
+export { TheatricalLightingCanvas } from './effects/TheatricalLightingCanvas';
+export { TheatricalCursor } from './effects/TheatricalCursor';
+
 // Common / UI Components
 export { LazyImage } from './common/LazyImage';
-export { CastSectionSkeleton, RehearsalSectionSkeleton } from './common/SectionSkeletons';
+export { AccessibleAudioTour } from './common/AccessibleAudioTour';
 export { EncodingWarningNotice } from './common/EncodingWarningNotice';
 export { FieldEditTip, PlaceholderNoticeCard } from './common/FieldEditTip';
+export { FocusEditModalWrapper } from './common/FocusEditModalWrapper';
+export { FocusEditModeToggle } from './common/FocusEditModeToggle';
+export { MagneticWrapper } from './ui/MagneticWrapper';
+export { TheatricalQuickDock } from './ui/TheatricalQuickDock';
 
 // Layout Components
 export { Navbar } from './layout/Navbar';
@@ -20,14 +28,7 @@ export { ScriptQuotesSection } from './sections/ScriptQuotesSection';
 export { MusicalShowcaseSection } from './sections/MusicalShowcaseSection';
 export { TicketInfoSection } from './sections/TicketInfoSection';
 export { VenueInfo } from './sections/VenueInfo';
-export { StoryChronicleDrawer, StoryChronicleTrigger } from './sections/StoryChronicle';
-export { CharacterNetwork } from './sections/CharacterNetwork';
+export { CampusWayfindingMap } from './sections/CampusWayfindingMap';
+export { StoryChronicleTrigger } from './sections/StoryChronicleTrigger';
+// CharacterNetwork, SimpleGuideView, QuickTableEditModal, ValjeanEscapeGameModal, and all heavy modals are lazy loaded for optimal chunk splitting and lightning-fast initial load
 
-// Modal Components
-export { AiLesMisLoungeModal } from './modals/AiLesMisLoungeModal';
-export { CastModal } from './modals/CastModal';
-export { EditMemberModal } from './modals/EditMemberModal';
-export { EditRehearsalModal } from './modals/EditRehearsalModal';
-export { ExportModal } from './modals/ExportModal';
-export { RehearsalModal } from './modals/RehearsalModal';
-export { PlaceholderGuideModal } from './modals/PlaceholderGuideModal';

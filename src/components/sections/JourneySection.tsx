@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo, useCallback, useMemo } from 'react';
 import { Quote, Camera, BookOpen, Layers, Maximize2, Plus, Edit3, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { FAMOUS_QUOTES } from '../../data/showData';
@@ -20,26 +20,136 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.05,
+      staggerChildren: 0.05,
+      delayChildren: 0.02,
     },
   },
 };
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20, scale: 0.95 },
+const itemVariants: any = {
+  hidden: { opacity: 0, y: 12 },
   visible: {
     opacity: 1,
     y: 0,
-    scale: 1,
     transition: {
-      duration: 0.45,
-      ease: [0.215, 0.61, 0.355, 1],
+      duration: 0.35,
+      ease: 'easeOut',
     },
   },
 };
 
-export const JourneySection: React.FC<JourneySectionProps> = ({
+interface RehearsalPhotoCardProps {
+  photo: RehearsalPhoto;
+  isEditMode: boolean;
+  onSelectPhoto: (photo: RehearsalPhoto) => void;
+  onEditPhoto: (photo: RehearsalPhoto) => void;
+  onDeletePhoto: (id: string) => void;
+}
+
+const RehearsalPhotoCard = memo<RehearsalPhotoCardProps>(({
+  photo,
+  isEditMode,
+  onSelectPhoto,
+  onEditPhoto,
+  onDeletePhoto,
+}) => {
+  const fallbackPhoto = 'https://images.unsplash.com/photo-1469488865564-c2de10f69f96?auto=format&fit=crop&w=600&q=80';
+
+  const handleCardClick = useCallback(() => {
+    if (!isEditMode && photo) {
+      ambientSynth.playCardClickSFX();
+      onSelectPhoto(photo);
+    }
+  }, [isEditMode, photo, onSelectPhoto]);
+
+  const handleEditClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (photo) onEditPhoto(photo);
+    },
+    [photo, onEditPhoto]
+  );
+
+  const handleDeleteClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (!photo?.id) return;
+      if (confirm(`確定要刪除這張相片紀錄嗎？`)) {
+        onDeletePhoto(photo.id);
+      }
+    },
+    [photo, onDeletePhoto]
+  );
+
+  return (
+    <motion.div
+      variants={itemVariants}
+      whileHover={!isEditMode ? { y: -4, transition: { duration: 0.2 } } : undefined}
+      whileTap={!isEditMode ? { scale: 0.98 } : undefined}
+      key={photo?.id || 'unknown'}
+      onClick={handleCardClick}
+      className={`group relative smoked-card border rounded-xl overflow-hidden aspect-[4/3] transform-gpu ${
+        isEditMode
+          ? 'border-[#8c2d2d]/60 bg-[#121214]'
+          : 'border-[var(--theme-card-border)] hover:border-amber-500/50 cursor-pointer smoked-card-hover'
+      }`}
+    >
+      <LazyImage
+        src={photo?.image || fallbackPhoto}
+        fallbackSrc={fallbackPhoto}
+        alt={photo?.title || '排練紀錄'}
+        className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+      />
+      
+      {/* Subtle Dark Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1c] via-transparent to-transparent opacity-80 group-hover:opacity-60 transition-opacity" />
+
+      {/* Edit Controls Overlay in Edit Mode */}
+      {isEditMode && (
+        <div className="absolute top-2 right-2 flex items-center gap-1.5 z-20">
+          <button
+            onClick={handleEditClick}
+            className="px-2.5 py-1 bg-[#8c2d2d] hover:bg-[#a33535] text-white rounded text-[11px] font-sans font-bold flex items-center gap-1 cursor-pointer touch-manipulation shadow-sm"
+            title="換相片或標題"
+          >
+            <Edit3 className="w-3 h-3" />
+            <span>換照/編輯</span>
+          </button>
+          <button
+            onClick={handleDeleteClick}
+            className="p-1 bg-black/80 hover:bg-red-900/80 text-stone-300 hover:text-white rounded shadow cursor-pointer touch-manipulation"
+            title="刪除照片"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
+      {/* Photo Info Badge */}
+      <div className="absolute bottom-0 inset-x-0 p-4 text-left space-y-1">
+        <span className="text-[10px] text-stone-400 font-sans tracking-widest block">
+          {photo?.date ?? '2026'} • {(photo?.category ?? 'stage').toUpperCase()}
+        </span>
+        <h4 className="font-serif-tc text-sm font-semibold text-[#f5f5f4] group-hover:text-amber-200/90 transition-colors">
+          {photo?.title || '排練寫真'}
+        </h4>
+        <p className="text-[11px] text-stone-400 font-sans line-clamp-1 opacity-90">
+          {photo?.caption || ''}
+        </p>
+      </div>
+
+      {!isEditMode && (
+        <div className="absolute top-3 right-3 p-1.5 rounded-full bg-[#1a1a1c]/80 text-stone-300 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Maximize2 className="w-3.5 h-3.5" />
+        </div>
+      )}
+    </motion.div>
+  );
+});
+
+RehearsalPhotoCard.displayName = 'RehearsalPhotoCard';
+
+export const JourneySection: React.FC<JourneySectionProps> = memo(({
   photos,
   isEditMode,
   onSelectPhoto,
@@ -49,9 +159,23 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
 }) => {
   const [activeQuoteIndex, setActiveQuoteIndex] = useState(0);
 
+  const safePhotos = useMemo(() => (Array.isArray(photos) ? photos : []), [photos]);
+  const quotesList = useMemo(() => (Array.isArray(FAMOUS_QUOTES) ? FAMOUS_QUOTES : []), []);
+  const currentQuote = quotesList[activeQuoteIndex] || quotesList[0] || {
+    quoteEn: 'Even the darkest night will end and the sun will rise.',
+    quoteZh: '黑夜終將過去，太陽終會升起。',
+    character: 'Victor Hugo',
+    context: '經典篇章',
+  };
+
+  const handleSelectQuote = useCallback((idx: number) => {
+    ambientSynth.playCardClickSFX();
+    setActiveQuoteIndex(idx);
+  }, []);
+
   return (
-    <section id="journey" className="py-24 px-4 sm:px-6 lg:px-8 relative border-t border-stone-800/60 bg-[#161618]">
-      <div className="max-w-7xl mx-auto space-y-16">
+    <section id="journey" className="py-24 px-4 sm:px-6 lg:px-8 relative border-t border-stone-800/60 overflow-hidden">
+      <div className="max-w-7xl mx-auto space-y-16 relative z-10">
         {/* Section Header */}
         <div className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 text-xs font-sans tracking-[0.2em] text-[#8c2d2d] uppercase">
@@ -94,18 +218,18 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                     className="space-y-4"
                   >
                     <blockquote className="font-garamond text-2xl sm:text-3xl text-[#f5f5f4] leading-relaxed italic border-l-2 border-[#8c2d2d] pl-5 py-1">
-                      “{FAMOUS_QUOTES[activeQuoteIndex].quoteEn}”
+                      “{currentQuote.quoteEn}”
                     </blockquote>
                     
                     <div className="pl-5 space-y-1">
                       <p className="font-serif-tc text-stone-300 text-sm sm:text-base">
-                        「{FAMOUS_QUOTES[activeQuoteIndex].quoteZh}」
+                        「{currentQuote.quoteZh}」
                       </p>
                       <p className="text-xs font-sans text-stone-400">
-                        — {FAMOUS_QUOTES[activeQuoteIndex].character}
+                        — {currentQuote.character}
                       </p>
                       <p className="text-[11px] font-sans text-stone-500 pt-1">
-                        {FAMOUS_QUOTES[activeQuoteIndex].context}
+                        {currentQuote.context}
                       </p>
                     </div>
                   </motion.div>
@@ -114,13 +238,10 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
 
               {/* Quote Nav Pills */}
               <div className="flex gap-2 pt-2">
-                {FAMOUS_QUOTES.map((_, idx) => (
+                {quotesList.map((_, idx) => (
                   <button
                     key={idx}
-                    onClick={() => {
-                      ambientSynth.playCardClickSFX();
-                      setActiveQuoteIndex(idx);
-                    }}
+                    onClick={() => handleSelectQuote(idx)}
                     className={`h-1.5 rounded-full transition-all duration-300 ${
                       activeQuoteIndex === idx ? 'w-8 bg-[#8c2d2d]' : 'w-2 bg-stone-700 hover:bg-stone-500'
                     }`}
@@ -136,7 +257,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                   <span>從單字讀音到心靈共鳴</span>
                 </h3>
                 <p className="text-xs text-stone-400 font-sans leading-relaxed">
-                  《悲慘世界》不僅是英文口語的極致考驗，更是一堂深刻的生命課。從 1830 年代法語辭彙的英語轉譯，到角色眼神中的絕望與救贖，高三學生們在課餘時間進行了無數次劇本對詞與歷史背景剖析。
+                  《悲慘世界》不僅是全英文對白與歌唱的極致挑戰，更是一堂叩問靈魂的生命教育。從 1830 年代古典詞彙的精準重音，到角色眼神中對苦難的抗爭與寬恕，高二知足雙語班的同學們在無數個放學午後反覆淬鍊，將劇本轉化為震撼人心的舞台共鳴。
                 </p>
               </div>
             </div>
@@ -171,99 +292,30 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
             </div>
 
             <motion.div
-              layout
               variants={containerVariants}
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: true, margin: '-40px' }}
+              viewport={{ once: true, margin: '150px 0px' }}
               className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1"
             >
-              <AnimatePresence>
-                {photos.map((photo) => (
-                  <motion.div
-                    layout
-                    variants={itemVariants}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    whileHover={!isEditMode ? { y: -4 } : {}}
-                    key={photo.id}
-                    onClick={() => {
-                      if (!isEditMode) {
-                        ambientSynth.playCardClickSFX();
-                        onSelectPhoto(photo);
-                      }
-                    }}
-                    className={`group relative smoked-card border overflow-hidden aspect-[4/3] ${
-                      isEditMode
-                        ? 'border-[#8c2d2d]/60 bg-[#121214]'
-                        : 'border-stone-800 cursor-pointer smoked-card-hover'
-                    }`}
-                  >
-                    <LazyImage
-                      src={photo.image}
-                      alt={photo.title}
-                      className="w-full h-full object-cover grayscale contrast-125 group-hover:scale-105 group-hover:grayscale-0 transition-all duration-500"
-                    />
-                    
-                    {/* Subtle Dark Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1c] via-transparent to-transparent opacity-80 group-hover:opacity-60 transition-opacity" />
-
-                    {/* Edit Controls Badge Overlay */}
-                    {isEditMode && (
-                      <div className="absolute top-2 right-2 flex items-center gap-1 z-20">
-                        <span className="px-2 py-0.5 rounded bg-black/80 text-[10px] text-amber-300 font-bold border border-amber-500/40 mr-1">
-                          [排練樣板]
-                        </span>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onEditPhoto(photo);
-                          }}
-                          className="p-1.5 bg-[#8c2d2d] hover:bg-[#8c2d2d]/80 text-white rounded shadow text-xs font-sans font-bold flex items-center gap-1"
-                          title="換相片或標題"
-                        >
-                          <Edit3 className="w-3 h-3" />
-                          <span>換照/編輯</span>
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (confirm(`確定要刪除這張相片紀錄嗎？`)) {
-                              onDeletePhoto(photo.id);
-                            }
-                          }}
-                          className="p-1.5 bg-black/80 text-stone-400 hover:text-red-400 rounded shadow"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Photo Info Badge */}
-                    <div className="absolute bottom-0 inset-x-0 p-4 text-left space-y-1">
-                      <span className="text-[10px] text-stone-400 font-sans tracking-widest block">
-                        {photo.date} • {photo.category.toUpperCase()}
-                      </span>
-                      <h4 className="font-serif-tc text-sm font-semibold text-[#f5f5f4] group-hover:text-amber-200/90 transition-colors">
-                        {photo.title}
-                      </h4>
-                      <p className="text-[11px] text-stone-400 font-sans line-clamp-1 opacity-90">
-                        {photo.caption}
-                      </p>
-                    </div>
-
-                    {!isEditMode && (
-                      <div className="absolute top-3 right-3 p-1.5 rounded-full bg-[#1a1a1c]/80 text-stone-300 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Maximize2 className="w-3.5 h-3.5" />
-                      </div>
-                    )}
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+              {safePhotos.map((photo) => (
+                <RehearsalPhotoCard
+                  key={photo.id}
+                  photo={photo}
+                  isEditMode={isEditMode}
+                  onSelectPhoto={onSelectPhoto}
+                  onEditPhoto={onEditPhoto}
+                  onDeletePhoto={onDeletePhoto}
+                />
+              ))}
             </motion.div>
           </div>
         </div>
       </div>
     </section>
   );
-};
+});
+
+JourneySection.displayName = 'JourneySection';
+
 

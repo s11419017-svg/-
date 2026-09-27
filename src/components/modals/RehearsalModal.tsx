@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Calendar, Camera, Maximize2 } from 'lucide-react';
+import { X, Calendar, Camera } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { RehearsalPhoto } from '../../types';
 
@@ -35,6 +35,9 @@ export const RehearsalModal: React.FC<RehearsalModalProps> = ({ photo, onClose }
           onClick={onClose}
         >
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="rehearsal-modal-title"
             initial={{ scale: 0.92, y: 20, opacity: 0 }}
             animate={{ scale: 1, y: 0, opacity: 1 }}
             exit={{ scale: 0.92, y: 20, opacity: 0 }}
@@ -44,8 +47,8 @@ export const RehearsalModal: React.FC<RehearsalModalProps> = ({ photo, onClose }
           >
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 z-20 p-2 rounded-full bg-[#1a1a1c]/80 text-stone-300 hover:text-white border border-stone-800 transition-colors"
-              aria-label="Close photo"
+              className="absolute top-4 right-4 z-20 p-2 rounded-full bg-[#1a1a1c]/80 text-stone-300 hover:text-white border border-stone-800 transition-colors focus-visible:ring-2 focus-visible:ring-amber-400"
+              aria-label="關閉排練照片視窗 (Esc)"
             >
               <X className="w-5 h-5" />
             </button>
@@ -54,20 +57,20 @@ export const RehearsalModal: React.FC<RehearsalModalProps> = ({ photo, onClose }
               <div className="lg:w-2/3 bg-stone-950 flex items-center justify-center p-2">
                 <img
                   src={photo.image}
-                  alt={photo.title}
+                  alt={`排練紀錄照片：${photo.title} (${photo.date})`}
                   referrerPolicy="no-referrer"
-                  className="max-h-[70vh] w-auto object-contain grayscale contrast-125"
+                  className="max-h-[70vh] w-auto object-contain"
                 />
               </div>
 
               <div className="lg:w-1/3 p-6 sm:p-8 flex flex-col justify-between border-t lg:border-t-0 lg:border-l border-stone-800 space-y-6">
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-xs font-sans text-[#8c2d2d] uppercase tracking-widest">
-                    <Camera className="w-3.5 h-3.5" />
+                    <Camera className="w-3.5 h-3.5" aria-hidden="true" />
                     <span>Rehearsal Archive</span>
                   </div>
 
-                  <h3 className="font-serif-tc text-2xl font-bold text-[#f5f5f4]">
+                  <h3 id="rehearsal-modal-title" className="font-serif-tc text-2xl font-bold text-[#f5f5f4]">
                     {photo.title}
                   </h3>
 

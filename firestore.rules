@@ -1,0 +1,16 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // School Drama Show Live Synced Data - allow public read for audience and validated write for show management
+    match /show_production/{docId} {
+      allow read: if true;
+      allow write: if docId == 'main_data'
+                   && request.resource.data.keys().hasOnly(['cast', 'photos', 'tracks', 'generalConfig', 'updatedAt', 'updatedBy']);
+    }
+
+    // Default deny all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

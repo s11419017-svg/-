@@ -5,24 +5,21 @@ import {
   Sparkles,
   MessageSquare,
   Bot,
-  User,
   Send,
   X,
   Compass,
   HeartHandshake,
-  PenTool,
   Loader2,
-  RefreshCw,
   Quote,
   Music,
-  ChevronRight,
   BookOpen,
-  Award,
-  Share2,
   Check,
-  HelpCircle
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import { ambientSynth } from '../../utils/audioSynth';
+import { callAiChat, callAiMood, MoodResult } from '../../utils/geminiClient';
+import { azureSpeechService } from '../../services/azureSpeechService';
 
 interface AiLesMisLoungeModalProps {
   isOpen: boolean;
@@ -104,13 +101,13 @@ const DRAMA_PRESETS = [
   '為什麼音樂劇中《Look Down》與《Do You Hear The People Sing》能引起如此廣泛的共鳴？',
   '請說明 1832 年巴黎六月起義（June Rebellion）的歷史背景與雨果的文學關懷。',
   '剖析《On My Own》與《A Heart Full of Love》在音樂主題上的對比與意境美感。',
-  '慈大附中高三學生以全英文公演《悲慘世界》，主要看點與舞台語言突破有哪些？'
+  '慈大附中高二知足雙語班學生以全英文公演《悲慘世界》，主要看點與舞台語言突破有哪些？'
 ];
 
 // Presets for Mood Matcher
 const MOOD_CATEGORIES = [
   { id: 'redemption', name: '尋求救贖／迷茫沉思', desc: '面對過往錯誤，尋找內心平靜', icon: Compass },
-  { id: 'justice', name: '堅守原則／渴望正義', desc: '在現實與道德規則間奮鬥', icon: Award },
+  { id: 'justice', name: '堅守原則／渴望正義', desc: '在現實與道德規則間奮鬥', icon: BookOpen },
   { id: 'lonely', name: '孤獨單戀／默默付出', desc: '無聲的思念，深沉而珍貴', icon: HeartHandshake },
   { id: 'passion', name: '熱血理想／勇於追夢', desc: '為了心中的光芒而無畏前行', icon: Sparkles }
 ];
@@ -120,7 +117,7 @@ export const AiLesMisLoungeModal: React.FC<AiLesMisLoungeModalProps> = ({
   onClose,
   initialCharacterId
 }) => {
-  const [activeTab, setActiveTab] = useState<'chat' | 'guide' | 'mood' | 'review'>('chat');
+  const [activeTab, setActiveTab] = useState<'chat' | 'guide' | 'mood'>('chat');
   
   // Character Chat state
   const [selectedCharId, setSelectedCharId] = useState<string>(initialCharacterId || 'valjean');
@@ -140,13 +137,8 @@ export const AiLesMisLoungeModal: React.FC<AiLesMisLoungeModalProps> = ({
   const [moodResult, setMoodResult] = useState<any>(null);
   const [isMoodLoading, setIsMoodLoading] = useState(false);
 
-  // Review Generator state
-  const [userNotes, setUserNotes] = useState('');
-  const [favChar, setFavChar] = useState('Jean Valjean');
-  const [rating, setRating] = useState(5);
-  const [reviewResult, setReviewResult] = useState<any>(null);
-  const [isReviewLoading, setIsReviewLoading] = useState(false);
-  const [copiedCaption, setCopiedCaption] = useState(false);
+  // Character speech voice playing state
+  const [playingSpeechId, setPlayingSpeechId] = useState<string | null>(null);
 
   const selectedChar = CHARACTERS.find((c) => c.id === selectedCharId) || CHARACTERS[0];
 
@@ -155,6 +147,52 @@ export const AiLesMisLoungeModal: React.FC<AiLesMisLoungeModalProps> = ({
       setSelectedCharId(initialCharacterId);
     }
   }, [initialCharacterId]);
+
+  // Cleanup speech on modal close or unmount
+  useEffect(() => {
+    return () => {
+      azureSpeechService.stop();
+      ambientSynth.unduck();
+    };
+  }, []);
+
+  // Handle Character Voice Speech Playback with Audio Ducking
+  const handlePlayCharacterSpeech = async (msgId: string, text: string, charId: string) => {
+    if (playingSpeechId === msgId) {
+      azureSpeechService.stop();
+      ambientSynth.unduck();
+      setPlayingSpeechId(null);
+      return;
+    }
+
+    ambientSynth.playButtonClickSFX();
+    azureSpeechService.stop();
+    ambientSynth.duck(0.18); // Duck background ambient music smoothly during speech
+    setPlayingSpeechId(msgId);
+
+    const charProfile = azureSpeechService.resolveCharacterVoice(charId);
+
+    try {
+      await azureSpeechService.speak({
+        text,
+        voice: charProfile.azureVoice,
+        lang: charProfile.lang,
+        pitch: charProfile.pitch,
+        style: charProfile.style,
+        onEnded: () => {
+          setPlayingSpeechId(null);
+          ambientSynth.unduck();
+        },
+        onError: () => {
+          setPlayingSpeechId(null);
+          ambientSynth.unduck();
+        },
+      });
+    } catch {
+      setPlayingSpeechId(null);
+      ambientSynth.unduck();
+    }
+  };
 
   // Scroll to bottom of chat
   useEffect(() => {
@@ -183,42 +221,33 @@ export const AiLesMisLoungeModal: React.FC<AiLesMisLoungeModalProps> = ({
 
     try {
       const historyPayload = chatMessages.map((m) => ({
-        role: m.sender === 'user' ? 'user' : 'model',
+        role: (m.sender === 'user' ? 'user' : 'model') as 'user' | 'model',
         text: m.text
       }));
 
-      const res = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: textToSend,
-          characterId: selectedChar.id,
-          characterName: selectedChar.name,
-          history: historyPayload
-        })
+      const replyText = await callAiChat({
+        message: textToSend,
+        characterId: selectedChar.id,
+        characterName: selectedChar.name,
+        history: historyPayload
       });
 
-      const data = await res.json();
-      if (res.ok && data.reply) {
-        setChatMessages((prev) => [
-          ...prev,
-          {
-            id: (Date.now() + 1).toString(),
-            sender: 'ai',
-            text: data.reply,
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          }
-        ]);
-      } else {
-        throw new Error(data.error || '無法取得回應');
-      }
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          sender: 'ai',
+          text: replyText,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+      ]);
     } catch (err: any) {
       setChatMessages((prev) => [
         ...prev,
         {
           id: (Date.now() + 1).toString(),
           sender: 'ai',
-          text: `【系統提示】AI 連線發生微小波動：${err.message || '請確認網路後重試'}。`,
+          text: `「愛能克服一切黑暗。」（連線提示：${err.message || '已切換為純淨文學導覽模式'}）`,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
       ]);
@@ -238,19 +267,12 @@ export const AiLesMisLoungeModal: React.FC<AiLesMisLoungeModalProps> = ({
     setGuideResponse(null);
 
     try {
-      const res = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: q })
+      const reply = await callAiChat({
+        message: q
       });
-      const data = await res.json();
-      if (res.ok && data.reply) {
-        setGuideResponse(data.reply);
-      } else {
-        throw new Error(data.error || '導覽解析失敗');
-      }
+      setGuideResponse(reply);
     } catch (err: any) {
-      setGuideResponse(`解析連線異常：${err.message}`);
+      setGuideResponse(`《悲慘世界》探討了人性在苦難中的尊嚴與救贖。高二雙語班同學的英文演出將呈現這段動人篇章。`);
     } finally {
       setIsGuideLoading(false);
     }
@@ -264,61 +286,15 @@ export const AiLesMisLoungeModal: React.FC<AiLesMisLoungeModalProps> = ({
 
     try {
       const catObj = MOOD_CATEGORIES.find((m) => m.id === selectedMoodCat);
-      const res = await fetch('/api/ai/analyze-mood', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          moodCategory: catObj?.name,
-          moodText: customMoodInput || catObj?.desc
-        })
+      const result = await callAiMood({
+        moodCategory: catObj?.name,
+        moodText: customMoodInput || catObj?.desc
       });
-      const data = await res.json();
-      if (res.ok) {
-        setMoodResult(data);
-      } else {
-        throw new Error(data.error || '心境解析失敗');
-      }
-    } catch (err: any) {
-      alert(`分析失敗：${err.message}`);
+      setMoodResult(result);
+    } catch {
+      // Fallback handled in callAiMood
     } finally {
       setIsMoodLoading(false);
-    }
-  };
-
-  // Review Generator Submit
-  const handleReviewSubmit = async () => {
-    if (isReviewLoading) return;
-    ambientSynth.playButtonClickSFX();
-    setIsReviewLoading(true);
-
-    try {
-      const res = await fetch('/api/ai/generate-review', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userNotes,
-          favoriteCharacter: favChar,
-          rating
-        })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setReviewResult(data);
-      } else {
-        throw new Error(data.error || '生成劇評失敗');
-      }
-    } catch (err: any) {
-      alert(`生成失敗：${err.message}`);
-    } finally {
-      setIsReviewLoading(false);
-    }
-  };
-
-  const handleCopyCaption = () => {
-    if (reviewResult?.socialCaption) {
-      navigator.clipboard.writeText(reviewResult.socialCaption);
-      setCopiedCaption(true);
-      setTimeout(() => setCopiedCaption(false), 2000);
     }
   };
 
@@ -335,20 +311,20 @@ export const AiLesMisLoungeModal: React.FC<AiLesMisLoungeModalProps> = ({
           className="relative w-full max-w-5xl bg-[#111114] border border-amber-500/30 rounded-lg shadow-2xl overflow-hidden flex flex-col my-auto max-h-[90vh]"
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-[#1c1414] via-[#2a1313] to-[#141822] p-4 sm:p-5 border-b border-stone-800 flex items-center justify-between shrink-0">
+          <div className="bg-gradient-to-r from-[#1c1414] via-[#241717] to-[#16171d] p-4 sm:p-5 border-b border-stone-800 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-[#8c2d2d]/30 border border-[#8c2d2d] rounded-lg text-amber-300">
-                <Sparkles className="w-5 h-5 animate-pulse" />
+              <div className="p-2 bg-[#8c2d2d]/20 border border-[#8c2d2d]/50 rounded-lg text-amber-300">
+                <BookOpen className="w-5 h-5" />
               </div>
               <div>
                 <h2 className="text-lg sm:text-xl font-bold font-serif-tc text-stone-100 flex items-center gap-2">
-                  <span>悲慘世界 AI 觀劇導覽與靈魂角色館</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono uppercase tracking-wider">
-                    Gemini 3.6
+                  <span>《悲慘世界》角色心聲訪談與導讀手冊</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-stone-800 text-stone-300 border border-stone-700 font-serif-tc tracking-wider">
+                    跨越 1832 的對話
                   </span>
                 </h2>
-                <p className="text-xs text-stone-400 font-sans">
-                  2026 慈大附中英文公演專屬智能對話、心境共鳴與靈魂創作助助手
+                <p className="text-xs text-stone-400 font-serif-tc">
+                  以雨果原著文學與歷史為基底，重現巴黎街壘八大主角的心靈歷程與觀劇導讀
                 </p>
               </div>
             </div>
@@ -378,7 +354,7 @@ export const AiLesMisLoungeModal: React.FC<AiLesMisLoungeModalProps> = ({
               }`}
             >
               <MessageSquare className="w-4 h-4" />
-              <span>角色對話靈魂問答</span>
+              <span>角色心靈訪談 (Characters)</span>
             </button>
 
             <button
@@ -393,7 +369,7 @@ export const AiLesMisLoungeModal: React.FC<AiLesMisLoungeModalProps> = ({
               }`}
             >
               <Compass className="w-4 h-4" />
-              <span>觀劇主題與哲學導覽</span>
+              <span>觀劇主題與哲學導讀</span>
             </button>
 
             <button
@@ -408,22 +384,7 @@ export const AiLesMisLoungeModal: React.FC<AiLesMisLoungeModalProps> = ({
               }`}
             >
               <HeartHandshake className="w-4 h-4" />
-              <span>心境共鳴與曲目配對</span>
-            </button>
-
-            <button
-              onClick={() => {
-                ambientSynth.playButtonClickSFX();
-                setActiveTab('review');
-              }}
-              className={`flex items-center gap-2 px-4 py-3 text-xs sm:text-sm font-serif-tc border-b-2 transition-all whitespace-nowrap ${
-                activeTab === 'review'
-                  ? 'border-amber-400 text-amber-300 font-bold bg-amber-500/10'
-                  : 'border-transparent text-stone-400 hover:text-stone-200'
-              }`}
-            >
-              <PenTool className="w-4 h-4" />
-              <span>觀劇心得與精選社群文案</span>
+              <span>心境共鳴與曲目推薦</span>
             </button>
           </div>
 
@@ -514,32 +475,65 @@ export const AiLesMisLoungeModal: React.FC<AiLesMisLoungeModalProps> = ({
                       </div>
                     )}
 
-                    {chatMessages.map((msg) => (
-                      <div
-                        key={msg.id}
-                        className={`flex gap-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                      >
-                        {msg.sender === 'ai' && (
-                          <img
-                            src={selectedChar.avatar}
-                            alt={selectedChar.name}
-                            className="w-7 h-7 rounded-full object-cover shrink-0 mt-1 border border-amber-400/50"
-                          />
-                        )}
+                    {chatMessages.map((msg) => {
+                      const isAi = msg.sender === 'ai';
+                      const isSpeaking = playingSpeechId === msg.id;
+
+                      return (
                         <div
-                          className={`max-w-[80%] p-3 rounded-lg text-xs sm:text-sm leading-relaxed ${
-                            msg.sender === 'user'
-                              ? 'bg-[#8c2d2d] text-white rounded-tr-none'
-                              : 'bg-stone-900 border border-stone-800 text-stone-200 rounded-tl-none font-serif-tc'
-                          }`}
+                          key={msg.id}
+                          className={`flex gap-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
-                          <p className="whitespace-pre-wrap">{msg.text}</p>
-                          <span className="text-[9px] text-stone-400 block text-right mt-1 opacity-60">
-                            {msg.time}
-                          </span>
+                          {isAi && (
+                            <img
+                              src={selectedChar.avatar}
+                              alt={selectedChar.name}
+                              className="w-7 h-7 rounded-full object-cover shrink-0 mt-1 border border-amber-400/50"
+                            />
+                          )}
+                          <div
+                            className={`max-w-[80%] p-3 rounded-lg text-xs sm:text-sm leading-relaxed ${
+                              msg.sender === 'user'
+                                ? 'bg-[#8c2d2d] text-white rounded-tr-none'
+                                : 'bg-stone-900 border border-stone-800 text-stone-200 rounded-tl-none font-serif-tc relative group'
+                            }`}
+                          >
+                            <p className="whitespace-pre-wrap">{msg.text}</p>
+                            
+                            <div className="flex items-center justify-between mt-2 pt-1 border-t border-stone-800/80">
+                              {isAi ? (
+                                <button
+                                  type="button"
+                                  onClick={() => handlePlayCharacterSpeech(msg.id, msg.text, selectedChar.id)}
+                                  className={`flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-sans transition-all ${
+                                    isSpeaking
+                                      ? 'bg-amber-500/30 text-amber-300 border border-amber-400 animate-pulse'
+                                      : 'bg-stone-800/90 hover:bg-stone-700 text-stone-400 hover:text-amber-200 border border-stone-700'
+                                  }`}
+                                  title={isSpeaking ? '停止朗讀' : '聆聽角色真摯原聲'}
+                                >
+                                  {isSpeaking ? (
+                                    <>
+                                      <VolumeX className="w-3 h-3 text-amber-400" />
+                                      <span>語音朗讀中...</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Volume2 className="w-3 h-3 text-amber-400/80" />
+                                      <span>聆聽原聲</span>
+                                    </>
+                                  )}
+                                </button>
+                              ) : <span />}
+                              
+                              <span className="text-[9px] text-stone-400 block text-right opacity-60">
+                                {msg.time}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
 
                     {isChatLoading && (
                       <div className="flex items-center gap-2 text-amber-400 text-xs italic p-2">
@@ -613,17 +607,40 @@ export const AiLesMisLoungeModal: React.FC<AiLesMisLoungeModalProps> = ({
                     disabled={isGuideLoading || !guideQuery.trim()}
                     className="bg-[#8c2d2d] hover:bg-[#a33535] disabled:opacity-50 text-white px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors"
                   >
-                    {isGuideLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                    <span>AI 深度導覽</span>
+                    {isGuideLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <BookOpen className="w-4 h-4" />}
+                    <span>深度主題導讀</span>
                   </button>
                 </div>
 
                 {/* Response Display */}
                 {guideResponse && (
                   <div className="bg-[#141417] border border-amber-500/30 rounded-lg p-5 space-y-3">
-                    <div className="flex items-center gap-2 text-amber-300 font-serif-tc font-bold text-base border-b border-stone-800 pb-2">
-                      <Sparkles className="w-5 h-5" />
-                      <span>【Gemini 觀劇深度剖析】</span>
+                    <div className="flex items-center justify-between border-b border-stone-800 pb-2">
+                      <div className="flex items-center gap-2 text-amber-300 font-serif-tc font-bold text-base">
+                        <BookOpen className="w-5 h-5" />
+                        <span>【雨果文學深度剖析】</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handlePlayCharacterSpeech('guide-readout', guideResponse, 'valjean')}
+                        className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-sans transition-all ${
+                          playingSpeechId === 'guide-readout'
+                            ? 'bg-amber-500/30 text-amber-300 border border-amber-400 animate-pulse'
+                            : 'bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-amber-200 border border-stone-700'
+                        }`}
+                      >
+                        {playingSpeechId === 'guide-readout' ? (
+                          <>
+                            <VolumeX className="w-3.5 h-3.5 text-amber-400" />
+                            <span>停止朗讀</span>
+                          </>
+                        ) : (
+                          <>
+                            <Volume2 className="w-3.5 h-3.5 text-amber-400" />
+                            <span>語音導讀全文</span>
+                          </>
+                        )}
+                      </button>
                     </div>
                     <div className="text-stone-200 text-sm leading-relaxed whitespace-pre-wrap font-serif-tc">
                       {guideResponse}
@@ -704,7 +721,30 @@ export const AiLesMisLoungeModal: React.FC<AiLesMisLoungeModalProps> = ({
 
                     <div className="space-y-3 text-xs sm:text-sm text-stone-200">
                       <div>
-                        <span className="text-amber-400 font-bold block mb-1">【靈魂心境連結】</span>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-amber-400 font-bold">【靈魂心境連結】</span>
+                          <button
+                            type="button"
+                            onClick={() => handlePlayCharacterSpeech('mood-insight', `${moodResult.characterName}的訊息：${moodResult.empathyInsight}。${moodResult.encouragementMessage}`, moodResult.characterEnglish || 'valjean')}
+                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-sans transition-all ${
+                              playingSpeechId === 'mood-insight'
+                                ? 'bg-amber-500/30 text-amber-300 border border-amber-400 animate-pulse'
+                                : 'bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-amber-200 border border-stone-700'
+                            }`}
+                          >
+                            {playingSpeechId === 'mood-insight' ? (
+                              <>
+                                <VolumeX className="w-3.5 h-3.5 text-amber-400" />
+                                <span>停止導讀</span>
+                              </>
+                            ) : (
+                              <>
+                                <Volume2 className="w-3.5 h-3.5 text-amber-400" />
+                                <span>聆聽角色共鳴導讀</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
                         <p className="leading-relaxed text-stone-300">{moodResult.empathyInsight}</p>
                       </div>
 
@@ -717,102 +757,6 @@ export const AiLesMisLoungeModal: React.FC<AiLesMisLoungeModalProps> = ({
                         <span className="text-amber-400 font-bold block mb-1">【來自悲慘世界的明晨祝福】</span>
                         <p className="leading-relaxed text-stone-300">{moodResult.encouragementMessage}</p>
                       </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* TAB 4: Review & Social Post Assistant */}
-            {activeTab === 'review' && (
-              <div className="space-y-5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-xs font-serif-tc text-stone-300 block">
-                      觀劇感受或簡短評語筆記：
-                    </label>
-                    <textarea
-                      rows={4}
-                      value={userNotes}
-                      onChange={(e) => setUserNotes(e.target.value)}
-                      placeholder="例如：舞台發音非常地道，特別是《Do You Hear The People Sing》的大合唱讓人熱淚盈眶..."
-                      className="w-full bg-stone-900 border border-stone-700 focus:border-amber-400 rounded-lg p-3 text-xs sm:text-sm text-stone-100 placeholder-stone-500 outline-none"
-                    />
-                  </div>
-
-                  <div className="space-y-4 bg-[#141417] p-4 border border-stone-800 rounded-lg">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-serif-tc text-stone-300 block">最受感動的角色：</label>
-                      <select
-                        value={favChar}
-                        onChange={(e) => setFavChar(e.target.value)}
-                        className="w-full bg-black/60 border border-stone-700 focus:border-amber-400 rounded-lg p-2 text-xs sm:text-sm text-stone-200 outline-none"
-                      >
-                        {CHARACTERS.map((c) => (
-                          <option key={c.id} value={c.name}>
-                            {c.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-serif-tc text-stone-300 block">演出綜合評分：</label>
-                      <div className="flex gap-2">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <button
-                            key={star}
-                            onClick={() => setRating(star)}
-                            className={`text-lg transition-transform ${
-                              star <= rating ? 'text-amber-400 scale-110' : 'text-stone-600'
-                            }`}
-                          >
-                            ★
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  onClick={handleReviewSubmit}
-                  disabled={isReviewLoading}
-                  className="w-full bg-[#8c2d2d] hover:bg-[#a33535] disabled:opacity-50 text-white py-3 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-colors shadow-lg"
-                >
-                  {isReviewLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <PenTool className="w-4 h-4" />}
-                  <span>生成精美劇評與 IG/FB 打卡社群文案</span>
-                </button>
-
-                {reviewResult && (
-                  <div className="bg-[#141417] border border-amber-500/40 rounded-lg p-5 space-y-4">
-                    <div className="border-b border-stone-800 pb-2">
-                      <h4 className="text-base font-serif-tc font-bold text-amber-300">
-                        {reviewResult.title}
-                      </h4>
-                    </div>
-
-                    <div className="text-sm text-stone-200 leading-relaxed font-serif-tc whitespace-pre-wrap">
-                      {reviewResult.reviewBody}
-                    </div>
-
-                    <div className="bg-black/60 border border-stone-800 rounded-lg p-4 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-sans text-amber-400 font-bold flex items-center gap-1.5">
-                          <Share2 className="w-3.5 h-3.5" />
-                          <span>一鍵複製社群分享貼文 (Instagram / Facebook)：</span>
-                        </span>
-                        <button
-                          onClick={handleCopyCaption}
-                          className="px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded text-xs font-serif-tc flex items-center gap-1 transition-all"
-                        >
-                          {copiedCaption ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Share2 className="w-3.5 h-3.5" />}
-                          <span>{copiedCaption ? '已複製！' : '複製貼文'}</span>
-                        </button>
-                      </div>
-                      <p className="text-xs text-stone-300 font-mono bg-stone-900 p-3 rounded border border-stone-800 select-all">
-                        {reviewResult.socialCaption}
-                      </p>
                     </div>
                   </div>
                 )}

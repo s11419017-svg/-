@@ -95,18 +95,18 @@ export const BOOK_PAGES: BookPage[] = [
     pageNumber: 5,
     chapterTitleEn: "EPILOGUE",
     chapterTitleZh: "終章：長夜將盡與太陽升起",
-    subTitle: "慈大附中高三畢業公演的世代精神傳承",
+    subTitle: "慈大附中高二知足班（雙語班）的世代精神傳承",
     yearSetting: "2026 年，慈大附中演藝廳",
     quoteEn: "To love another person is to see the face of God. Even the darkest night will end and the sun will rise!",
     quoteZh: "去愛一個人，就是看見上帝的容顏。即便最黑暗的長夜終將結束，太陽必將升起！",
     dropCap: "歷",
     contentZh: [
       "馬禮斯與珂賽特舉辦了盛大婚禮，尚萬強在完成了人生所有使命後，在蠟燭微光中平靜走向生命的終點。芳婷與愛波妮的英靈前來接引，全體角色唱響終曲《Epilogue》。",
-      "二〇二六年慈大附中高三學生選擇《悲慘世界》作為畢業公演劇本，不僅是語言能力與舞台藝術的展現，更是十七歲青年對當代社會關懷與人性尊嚴的深刻體悟。",
+      "二〇二六年慈大附中高二知足班（雙語班）同學選擇《悲慘世界》作為年度英文公演劇本，不僅是語言能力與舞台藝術的展現，更是十七歲青年對社會關懷與人性尊嚴的深刻體悟。",
       "從一八一五年的狄涅到二〇二六年的花蓮演藝廳，這部經典史詩將繼續感動每一位走進劇場的靈魂。邀請您一同翻開這本歲月手稿，見證長夜盡頭的燦爛曙光！"
     ],
-    historicalContext: "慈大附中 115 級高三年級畢業英文公演，全體師生歷經半年跨領域排練，打造花蓮在地最具震撼力的青少年劇院盛事。",
-    keyThemes: ["世代傳承", "永恆的愛與希望", "畢業公演精神"],
+    historicalContext: "慈大附中 115 級高二知足雙語班英文公演，全體師生歷經半年跨領域排練，打造花蓮在地最具震撼力的青少年劇院盛事。",
+    keyThemes: ["世代傳承", "永恆的愛與希望", "雙語公演精神"],
     illustrationUrl: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=800&q=80",
     illustrationCaption: "古典羽毛筆與手稿詩集紀念印記"
   }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { HelpCircle, X, CheckCircle2, ShieldCheck, Sparkles, BookOpen, Camera, FileText } from 'lucide-react';
+import { HelpCircle, X, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface PlaceholderGuideModalProps {

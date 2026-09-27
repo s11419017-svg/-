@@ -2,49 +2,340 @@
 
 @layer base {
   html {
-    scroll-behavior: smooth;
     scroll-padding-top: 80px;
+    color-scheme: dark;
+    background-color: #121215;
+    -webkit-overflow-scrolling: touch;
+    overflow-x: clip;
+    text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  html.light {
+    color-scheme: light;
+    background-color: #faf7f2;
   }
 
   :root {
-    --bg-dark: #1a1a1c;
-    --text-light: #f5f5f4;
-    --navy-blue: #2b3a4a;
+    --bg-dark: #121215;
+    --text-light: #fafaf9;
+    --navy-blue: #1e293b;
     --brick-red: #8c2d2d;
+    --crimson-vivid: #a82828;
     --gold-accent: #c4a77d;
+    --gold-radiant: #e5c07b;
+    
+    /* 2026 Fluid Typography & Spacing Scale (Major Second & Perfect Fourth) */
+    --fluid-h1: clamp(2.5rem, 1.8rem + 3.5vw, 4.75rem);
+    --fluid-h2: clamp(1.85rem, 1.35rem + 2.5vw, 3.25rem);
+    --fluid-h3: clamp(1.4rem, 1.15rem + 1.2vw, 2.15rem);
+    --fluid-body: clamp(0.95rem, 0.88rem + 0.35vw, 1.125rem);
+    --fluid-caption: clamp(0.75rem, 0.72rem + 0.15vw, 0.875rem);
+    --fluid-space-section: clamp(4.5rem, 3rem + 5vw, 8.5rem);
+    --fluid-container-px: clamp(1rem, 0.75rem + 2vw, 3rem);
+
+    /* 2026 Fluid Motion Easing Curve */
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-bounce-soft: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* Dynamic Theme Variables - Dark Default (Theatrical Velvet & Crimson Noir) */
+    --theme-bg-main: #0b0b0e;
+    --theme-bg-canvas: #070709;
+    --theme-text-primary: #fdfbf7;
+    --theme-text-secondary: #e5e0d8;
+    --theme-text-muted: #a39c94;
+    --theme-card-bg: rgba(18, 18, 23, 0.94);
+    --theme-card-border: rgba(212, 178, 111, 0.14);
+    --theme-card-hover-border: rgba(212, 178, 111, 0.65);
+    --theme-card-shadow: 0 8px 30px -8px rgba(0, 0, 0, 0.75);
+    --theme-card-hover-shadow: 0 16px 42px -8px rgba(139, 37, 43, 0.45), 0 0 24px -4px rgba(212, 178, 111, 0.25);
+    --theme-nav-bg: rgba(11, 11, 14, 0.94);
+    --theme-nav-border: rgba(212, 178, 111, 0.16);
+    --theme-accent-red: #a62d35;
+    --theme-accent-gold: #d4b26f;
+    --theme-spotlight-beam: rgba(212, 178, 111, 0.10);
+  }
+
+  /* 19th Century French Parchment & Ink Collector Light Theme - Rich, High-Contrast */
+  html.light {
+    color-scheme: light;
+    --theme-bg-main: #f8f5ee;
+    --theme-bg-canvas: #eee8dc;
+    --theme-text-primary: #141210;
+    --theme-text-secondary: #34302b;
+    --theme-text-muted: #665f56;
+    --theme-card-bg: #fcfaf5;
+    --theme-card-border: rgba(139, 37, 43, 0.16);
+    --theme-card-hover-border: rgba(158, 42, 48, 0.75);
+    --theme-card-shadow: 
+      0 1px 3px rgba(44, 34, 25, 0.05),
+      0 6px 18px -3px rgba(44, 34, 25, 0.08);
+    --theme-card-hover-shadow: 
+      0 4px 10px -1px rgba(44, 34, 25, 0.08),
+      0 16px 32px -4px rgba(44, 34, 25, 0.13),
+      0 20px 48px -8px rgba(158, 42, 48, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    --theme-nav-bg: rgba(248, 245, 238, 0.96);
+    --theme-nav-border: rgba(139, 37, 43, 0.15);
+    --theme-accent-red: #8b252b;
+    --theme-accent-gold: #9c6f28;
+    --theme-spotlight-beam: rgba(139, 37, 43, 0.06);
   }
 
   body {
-    background-color: #1a1a1c;
-    color: #f5f5f4;
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background-color: var(--theme-bg-main);
+    color: var(--theme-text-primary);
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
+    overflow-x: clip;
+    font-size: var(--fluid-body);
+    line-height: 1.7;
+    position: relative;
+    letter-spacing: -0.01em;
+    touch-action: pan-y pinch-zoom;
   }
+
+  /* Text Balance & Pretty Wrap Standard */
+  h1, h2, h3, h4, h5, h6 {
+    text-wrap: balance;
+    letter-spacing: -0.015em;
+  }
+
+  p, li, blockquote {
+    text-wrap: pretty;
+  }
+
+  /* Tabular Figures for Dates, Timers, Prices */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
   ::selection {
     background-color: #8c2d2d;
     color: #ffffff;
   }
 }
 
-/* Fixed Ultra-Fast GPU-Accelerated Background Canvas (Zero-repaint radial gradients) */
+/* 2026 Ultra-Efficient GPU-Accelerated Ambient Glow System */
+@keyframes ambient-pulse {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translate3d(12px, -8px, 0) scale(1.08);
+    opacity: 0.8;
+  }
+}
+
+@keyframes ambient-pulse-slow {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate3d(-12px, 10px, 0) scale(0.95);
+    opacity: 0.75;
+  }
+}
+
+.animate-ambient-pulse {
+  animation: ambient-pulse 9s ease-in-out infinite;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+.animate-ambient-pulse-slow {
+  animation: ambient-pulse-slow 12s ease-in-out infinite;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+/* 2026 Modern View Transitions API Standard */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.35s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Fixed Ultra-Fast GPU-Accelerated Background Canvas with Theatrical Gradients */
 #bg-canvas-layer {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 0;
+  z-index: -20;
   background: 
-    radial-gradient(circle at 50% 0%, rgba(43, 58, 74, 0.28) 0%, transparent 65%),
-    radial-gradient(circle at 85% 85%, rgba(140, 45, 45, 0.15) 0%, transparent 55%),
-    #1a1a1c;
+    radial-gradient(circle at 50% 0%, rgba(30, 41, 59, 0.5) 0%, transparent 70%),
+    radial-gradient(circle at 15% 45%, rgba(140, 45, 45, 0.22) 0%, transparent 60%),
+    radial-gradient(circle at 85% 85%, rgba(196, 167, 125, 0.16) 0%, transparent 55%),
+    #121215;
   transform: translateZ(0);
+}
+
+html.light #bg-canvas-layer {
+  background: 
+    radial-gradient(circle at 50% 0%, rgba(212, 181, 137, 0.22) 0%, transparent 65%),
+    radial-gradient(circle at 15% 40%, rgba(140, 45, 45, 0.06) 0%, transparent 55%),
+    radial-gradient(circle at 85% 85%, rgba(212, 181, 137, 0.18) 0%, transparent 60%),
+    #faf7f2;
+}
+
+/* Theatrical Stage Spotlight Beam Overlays */
+.theatre-spotlight-beam {
+  background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(212, 181, 137, 0.12) 0%, rgba(140, 45, 45, 0.08) 50%, transparent 80%);
+}
+
+html.light .theatre-spotlight-beam {
+  background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(212, 181, 137, 0.18) 0%, rgba(140, 45, 45, 0.05) 50%, transparent 80%);
+}
+
+/* Luminous Glow Utilities */
+.glow-gold-subtle {
+  box-shadow: 0 0 24px -4px rgba(212, 181, 137, 0.35);
+}
+
+.glow-crimson-subtle {
+  box-shadow: 0 0 24px -4px rgba(140, 45, 45, 0.4);
+}
+
+/* 2026 Ambient Glassmorphism & Micro-Shadow Depth Layers */
+.glass-ambient {
+  background: rgba(26, 26, 28, 0.78);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.2),
+    0 8px 24px -6px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.glass-ambient-card {
+  background: rgba(22, 22, 25, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.15),
+    0 12px 32px -8px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-ambient-card:hover {
+  transform: translateY(-3px) translateZ(0);
+  border-color: rgba(196, 167, 125, 0.35);
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.2),
+    0 20px 40px -10px rgba(140, 45, 45, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* 2.5D Theatrical Specular Sheen (Zero-overhead local gradient, NO 'fixed' repaint bottleneck) */
+.glass-ambient-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    380px circle at 50% 25%,
+    rgba(212, 181, 137, 0.08) 0%,
+    rgba(140, 45, 45, 0.03) 40%,
+    transparent 80%
+  );
+  pointer-events: none;
+  opacity: 0.85;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.light .glass-ambient-card::before {
+  background: radial-gradient(
+    380px circle at 50% 25%,
+    rgba(140, 45, 45, 0.05) 0%,
+    rgba(212, 181, 137, 0.04) 40%,
+    transparent 80%
+  );
+  opacity: 0.7;
+}
+
+/* 2026 Viewport-Aware Virtual Section Rendering Optimization */
+.section-render-optimized {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 800px;
+}
+
+/* 2026 Low-Power & Hardware-Constrained Adaptive Mode (Zero-CPU Bottleneck) */
+.low-power-mode .glass-ambient,
+.low-power-mode .glass-ambient-card {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: rgba(22, 22, 25, 0.94);
+}
+
+.low-power-mode.light .glass-ambient,
+.low-power-mode.light .glass-ambient-card {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: rgba(248, 246, 241, 0.96);
+}
+
+.low-power-mode #theatrical-lighting-canvas {
+  opacity: 0.35 !important;
+}
+
+/* Graceful Fallback for Older Browsers Without Hardware Backdrop-Filter Support */
+@supports not (backdrop-filter: blur(10px)) {
+  .glass-ambient,
+  .glass-ambient-card {
+    background: rgba(22, 22, 25, 0.95) !important;
+  }
+  .light .glass-ambient,
+  .light .glass-ambient-card {
+    background: rgba(248, 246, 241, 0.96) !important;
+  }
+}
+
+/* Safe-Area Padding for iOS Notch & Mobile Virtual Home Bar */
+.safe-area-bottom {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+}
+
+.safe-area-top {
+  padding-top: max(0.75rem, env(safe-area-inset-top, 0px));
+}
+
+/* WCAG 2.1 AAA Preferred Reduced Motion Standard */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  #theatrical-lighting-canvas {
+    display: none !important;
+  }
 }
 
 /* Mobile & Touch Ergonomics Optimization */
 html, body {
   -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
+  touch-action: pan-y pinch-zoom;
 }
 
 button, a, input, select, textarea, [role="button"] {
@@ -60,7 +351,8 @@ button, [role="button"] {
 /* Smooth Touch Momentum Scrolling for Drawers and Modals */
 .touch-scroll {
   -webkit-overflow-scrolling: touch;
-  over-scroll-behavior: contain;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 /* Touch Active Response & Minimum Target Size Utilities */
@@ -73,56 +365,431 @@ button, [role="button"] {
 }
 
 .touch-active {
-  transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.15s ease;
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease;
+  will-change: transform;
 }
 
 .touch-active:active {
-  transform: scale(0.94);
-  opacity: 0.88;
-}
-
-/* Front-end Performance Optimization Utilities */
-.content-visibility-auto {
-  content-visibility: auto;
-  contain-intrinsic-size: 1px 700px;
+  transform: scale(0.95);
+  opacity: 0.9;
 }
 
 .gpu-accelerated {
-  will-change: transform;
-  transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
 }
 
+/* Typography Hierarchy & Luxury Editorial Craftsmanship */
 .font-cinzel {
   font-family: 'Cinzel', 'Noto Serif TC', serif;
+  letter-spacing: 0.06em;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1, "liga" 1;
 }
 
 .font-serif-tc {
-  font-family: 'Noto Serif TC', 'Cormorant Garamond', serif;
+  font-family: 'Noto Serif TC', 'Source Han Serif TC', 'Songti TC', 'STSong', serif;
+  line-height: 1.8;
+  letter-spacing: 0.025em;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1, "palt" 1;
+}
+
+.font-sans-tc {
+  font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+  line-height: 1.7;
+  letter-spacing: 0.015em;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1;
 }
 
 .font-garamond {
   font-family: 'Cormorant Garamond', 'Noto Serif TC', serif;
+  line-height: 1.85;
+  letter-spacing: 0.02em;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "liga" 1, "kern" 1;
 }
 
-/* High-Performance Smoked Card (Replaced GPU-heavy backdrop-blur with opaque contrast) */
+/* Theatrical Literary Reading Column */
+.prose-theatrical {
+  max-width: 68ch;
+  line-height: 1.85;
+  letter-spacing: 0.02em;
+  text-rendering: optimizeLegibility;
+}
+
+/* Open Tracking & Airy Line Height Utilities */
+.tracking-cinzel-loose {
+  letter-spacing: 0.22em;
+}
+
+.tracking-cinzel-widest {
+  letter-spacing: 0.28em;
+}
+
+.leading-luxury {
+  line-height: 1.9;
+}
+
+.text-balance-title {
+  text-wrap: balance;
+  line-height: 1.25;
+}
+
+/* High-Performance Theatrical Card (Dark & Parchment Light Reactive) */
 .smoked-card {
-  background: rgba(22, 22, 24, 0.95);
-  border: 1px solid rgba(245, 245, 244, 0.08);
-  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.4);
+  background: var(--theme-card-bg);
+  border: 1px solid var(--theme-card-border);
+  box-shadow: var(--theme-card-shadow);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transition: background 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .smoked-card-hover {
-  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  will-change: transform;
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transition: border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+              background 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .smoked-card-hover:hover {
-  border-color: rgba(140, 45, 45, 0.4);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 28px -8px rgba(140, 45, 45, 0.2);
+  border-color: var(--theme-card-hover-border);
+  transform: translateY(-3px) translateZ(0);
+  box-shadow: var(--theme-card-hover-shadow);
 }
 
-/* Vintage Paper Ticket Texture (Optimized without SVG noise filter) */
+/* Global Typography Luminance Calibration for Dark Mode */
+.text-stone-300 {
+  color: #e7e5e4;
+}
+
+.text-stone-400 {
+  color: #d6d3d1;
+}
+
+.text-stone-500 {
+  color: #a8a29e;
+}
+
+/* Light Theme Comprehensive Component & Typography Adaptations */
+html.light #bg-canvas-layer {
+  background: 
+    radial-gradient(circle at 50% 0%, rgba(214, 180, 132, 0.35) 0%, transparent 65%),
+    radial-gradient(circle at 85% 85%, rgba(158, 42, 43, 0.12) 0%, transparent 55%),
+    #f3ece3;
+}
+
+/* Light Theme Typography Contrast Enhancements */
+html.light h1,
+html.light h2,
+html.light h3,
+html.light h4,
+html.light .font-cinzel {
+  color: #181513;
+}
+
+html.light p,
+html.light span,
+html.light li,
+html.light div {
+  /* Ensure smooth fallback to parchment text */
+  --tw-text-opacity: 1;
+}
+
+/* Specific text color adaptations in light mode - Rich Ink Readability */
+html.light .text-\[\#f5f5f4\],
+html.light .text-stone-100 {
+  color: #181513 !important;
+}
+
+html.light .text-stone-200 {
+  color: #262220 !important;
+}
+
+html.light .text-stone-300,
+html.light .text-stone-300\/90 {
+  color: #383430 !important;
+}
+
+html.light .text-stone-400 {
+  color: #4d4843 !important;
+}
+
+html.light .text-stone-500 {
+  color: #68625c !important;
+}
+
+html.light .text-amber-200,
+html.light .text-amber-200\/90,
+html.light .text-amber-300,
+html.light .text-amber-100 {
+  color: #854d0e !important; /* Rich antique bronze gold */
+}
+
+/* Ensure buttons and dark accents retain crisp white text in light mode */
+html.light button[class*="bg-[#8c2d2d]"],
+html.light button[class*="bg-[#8c2d2d]"] *,
+html.light [class*="bg-[#8c2d2d]"] > span.text-white,
+html.light [class*="bg-[#8c2d2d]"] span.text-white,
+html.light [class*="bg-[#8c2d2d]"].text-white,
+html.light .bg-stone-900.text-white,
+html.light .bg-stone-900.text-white *,
+html.light .ticket-stamp,
+html.light .ticket-stamp * {
+  color: #ffffff !important;
+}
+
+/* Card, background and container adaptations */
+html.light .bg-\[\#1a1a1c\],
+html.light .bg-\[\#1a1a1c\]\/90,
+html.light .bg-\[\#1a1a1c\]\/80,
+html.light .bg-\[\#161618\],
+html.light .bg-\[\#161618\]\/95,
+html.light .bg-\[\#161618\]\/90,
+html.light .bg-\[\#161618\]\/80,
+html.light .bg-\[\#121214\],
+html.light .bg-\[\#121214\]\/90,
+html.light .bg-\[\#121214\]\/80,
+html.light .bg-\[\#121214\]\/60,
+html.light .bg-\[\#1e1e21\],
+html.light .bg-\[\#1e1e22\],
+html.light .bg-\[\#1e1e22\]\/90,
+html.light .bg-stone-900,
+html.light .bg-stone-900\/60,
+html.light .bg-stone-900\/70,
+html.light .bg-stone-900\/80,
+html.light .bg-stone-900\/90,
+html.light .bg-stone-900\/95,
+html.light .bg-stone-950,
+html.light .bg-black\/40,
+html.light .bg-black\/50,
+html.light .bg-black\/60,
+html.light .bg-black\/70 {
+  background-color: #fdfbf7 !important;
+}
+
+html.light .bg-\[\#1a1a1c\]\/80,
+html.light .bg-\[\#161618\]\/95,
+html.light .bg-\[\#121214\]\/90 {
+  background-color: rgba(253, 251, 247, 0.95) !important;
+}
+
+html.light .bg-stone-800,
+html.light .bg-stone-800\/60,
+html.light .bg-stone-800\/80 {
+  background-color: #f4efea !important;
+}
+
+/* Border adaptations in light mode */
+html.light .border-stone-800,
+html.light .border-stone-800\/50,
+html.light .border-stone-800\/60,
+html.light .border-stone-800\/80,
+html.light .border-stone-700,
+html.light .border-stone-700\/80,
+html.light .border-stone-700\/60 {
+  border-color: rgba(140, 45, 45, 0.14) !important;
+}
+
+html.light .border-white\/5,
+html.light .border-white\/10 {
+  border-color: rgba(140, 45, 45, 0.12) !important;
+}
+
+/* Commemorative Admission Ticket Styles (Light & Dark Reactive) */
+.commemorative-ticket {
+  background: linear-gradient(to bottom, #251d18 0%, #1c1511 50%, #140e0b 100%);
+  border: 2px solid rgba(217, 119, 6, 0.5);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+  color: #f5f5f4;
+}
+
+.commemorative-ticket .ticket-header-title {
+  color: #fef3c7;
+}
+
+.commemorative-ticket .ticket-header-badge {
+  color: #fbbf24;
+}
+
+.commemorative-ticket .ticket-subtitle {
+  color: #d6d3d1;
+}
+
+.commemorative-ticket .ticket-row-label {
+  color: #a8a29e;
+}
+
+.commemorative-ticket .ticket-row-value {
+  color: #fde68a;
+}
+
+.commemorative-ticket .ticket-flourish {
+  border-color: rgba(251, 191, 36, 0.8);
+}
+
+.commemorative-ticket .ticket-stub-code {
+  color: #fbbf24;
+}
+
+.commemorative-ticket .ticket-divider {
+  border-color: rgba(217, 119, 6, 0.3);
+}
+
+.commemorative-ticket .ticket-stub-border {
+  border-color: rgba(217, 119, 6, 0.4);
+}
+
+.commemorative-ticket .ticket-stamp {
+  background-color: #8c2d2d;
+  color: #fef3c7;
+  border-color: rgba(245, 158, 11, 0.5);
+}
+
+/* Light Mode Commemorative Ticket (19th Century French Ivory Parchment) */
+html.light .commemorative-ticket {
+  background: linear-gradient(to bottom, #fffdfa 0%, #fbf6ec 50%, #f3ebd9 100%) !important;
+  border: 2px solid rgba(140, 45, 45, 0.35) !important;
+  box-shadow: 0 16px 36px -6px rgba(140, 45, 45, 0.14), 0 4px 12px rgba(68, 64, 60, 0.08) !important;
+  color: #181513 !important;
+}
+
+html.light .commemorative-ticket .ticket-header-title {
+  color: #8c2d2d !important;
+}
+
+html.light .commemorative-ticket .ticket-header-badge {
+  color: #854d0e !important;
+}
+
+html.light .commemorative-ticket .ticket-subtitle {
+  color: #57534e !important;
+}
+
+html.light .commemorative-ticket .ticket-row-label {
+  color: #66615b !important;
+}
+
+html.light .commemorative-ticket .ticket-row-value {
+  color: #181513 !important;
+}
+
+html.light .commemorative-ticket .ticket-flourish {
+  border-color: rgba(140, 45, 45, 0.6) !important;
+}
+
+html.light .commemorative-ticket .ticket-stub-code {
+  color: #8c2d2d !important;
+}
+
+html.light .commemorative-ticket .ticket-divider {
+  border-color: rgba(140, 45, 45, 0.16) !important;
+}
+
+html.light .commemorative-ticket .ticket-stub-border {
+  border-color: rgba(140, 45, 45, 0.25) !important;
+}
+
+html.light .commemorative-ticket .ticket-stamp {
+  background-color: #8c2d2d !important;
+  color: #ffffff !important;
+  border-color: rgba(196, 167, 125, 0.8) !important;
+  box-shadow: 0 4px 12px rgba(140, 45, 45, 0.3) !important;
+}
+
+/* Hero Section Overlay in Light Mode */
+html.light #hero .bg-gradient-to-t {
+  background-image: linear-gradient(to top, #faf7f2 0%, rgba(250, 247, 242, 0.85) 50%, rgba(250, 247, 242, 0.6) 100%) !important;
+}
+
+html.light #hero .bg-radial {
+  background-image: radial-gradient(circle, transparent 20%, rgba(250, 247, 242, 0.6) 60%, #faf7f2 100%) !important;
+}
+
+/* Modal Backdrops & Dialogs in Light Mode */
+html.light .fixed.inset-0.bg-black\/80,
+html.light .fixed.inset-0.bg-black\/85,
+html.light .fixed.inset-0.bg-black\/90,
+html.light .fixed.inset-0.bg-black\/75 {
+  background-color: rgba(28, 25, 23, 0.65) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+/* Badges, Pills & Buttons in Light Mode */
+html.light .inline-flex.items-center.gap-2.px-3\.5,
+html.light .inline-flex.items-center.gap-2.px-4 {
+  background-color: rgba(244, 239, 234, 0.95);
+  border-color: rgba(140, 45, 45, 0.18);
+  color: #44403c;
+}
+
+html.light .glass-ambient {
+  background: rgba(253, 251, 247, 0.94);
+  border: 1px solid rgba(140, 45, 45, 0.14);
+  box-shadow: 
+    0 1px 2px rgba(68, 64, 60, 0.05),
+    0 8px 24px -6px rgba(68, 64, 60, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+html.light .glass-ambient-card {
+  background: rgba(253, 251, 247, 0.96);
+  border: 1px solid rgba(140, 45, 45, 0.14);
+  box-shadow: 
+    0 2px 4px rgba(68, 64, 60, 0.04),
+    0 12px 32px -8px rgba(68, 64, 60, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+html.light .glass-ambient-card:hover {
+  border-color: rgba(140, 45, 45, 0.45);
+  box-shadow: 
+    0 4px 8px rgba(68, 64, 60, 0.06),
+    0 20px 40px -10px rgba(140, 45, 45, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+html.light ::-webkit-scrollbar-track {
+  background: #ede6dc;
+}
+html.light ::-webkit-scrollbar-thumb {
+  background: #c4a77d;
+}
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #8c2d2d;
+}
+
+/* Light Theme Relationship Network (D3 Tree/Graph) Contrast Optimizations */
+html.light .character-network-canvas {
+  background-color: #f7f3eb !important;
+  border-color: rgba(140, 45, 45, 0.25) !important;
+}
+
+html.light .character-network-panel {
+  background-color: #fcfaf6 !important;
+  border-color: rgba(140, 45, 45, 0.2) !important;
+  color: #1c1917 !important;
+}
+
+/* Ensure high-contrast danger elements in light mode */
+html.light .text-danger-themed {
+  color: #9e2a2b !important;
+}
+
+html.light .bg-danger-themed {
+  background-color: #9e2a2b !important;
+  color: #ffffff !important;
+}
+
+/* Vintage Paper Ticket Texture */
 .ticket-paper {
   background-color: #f4efdf;
   color: #1c1917;
@@ -150,7 +817,185 @@ button, [role="button"] {
   }
 }
 
-/* Custom Scrollbar */
+/* Accessible reduced-motion preference & manual override */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html.reduce-motion *,
+html.reduce-motion ::before,
+html.reduce-motion ::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Accessible High-Contrast Mode (WCAG AAA Compliance) */
+html.high-contrast {
+  --theme-text-primary: #ffffff !important;
+  --theme-text-secondary: #f3f4f6 !important;
+  --theme-text-muted: #e5e7eb !important;
+  --theme-card-bg: #09090b !important;
+  --theme-card-border: #ffffff !important;
+  --theme-card-hover-border: #facc15 !important;
+  --theme-card-shadow: none !important;
+  --theme-card-hover-shadow: 0 0 0 2px #facc15 !important;
+}
+
+/* Master Accessibility-Friendly Mode Styles */
+html.accessibility-friendly-mode {
+  --theme-text-primary: #ffffff !important;
+  --theme-text-secondary: #f4f4f5 !important;
+  --theme-text-muted: #d4d4d8 !important;
+  --theme-card-bg: #0c0a09 !important;
+  --theme-card-border: rgba(245, 158, 11, 0.6) !important;
+  --theme-card-hover-border: #fbbf24 !important;
+  --theme-spotlight-beam: transparent !important;
+}
+
+html.accessibility-friendly-mode body {
+  letter-spacing: 0.01em !important;
+  word-spacing: 0.05em !important;
+  line-height: 1.8 !important;
+}
+
+html.accessibility-friendly-mode :focus-visible {
+  outline: 4px solid #f59e0b !important;
+  outline-offset: 4px !important;
+}
+
+html.light.high-contrast {
+  --theme-text-primary: #000000 !important;
+  --theme-text-secondary: #111827 !important;
+  --theme-text-muted: #374151 !important;
+  --theme-card-bg: #ffffff !important;
+  --theme-card-border: #000000 !important;
+  --theme-card-hover-border: #8c2424 !important;
+  --theme-card-shadow: none !important;
+  --theme-card-hover-shadow: 0 0 0 2px #000000 !important;
+}
+
+/* Smooth Navigation Scroll Offsets to Clear Sticky Navigation Bar */
+section[id] {
+  scroll-margin-top: 84px;
+}
+
+/* Scalable Font Size Multipliers for Low-Vision Accessibility & Layout Resilience */
+html.text-size-medium {
+  font-size: 110% !important;
+}
+
+html.text-size-large {
+  font-size: 122% !important;
+}
+
+html.text-size-xlarge {
+  font-size: 135% !important;
+}
+
+/* Comprehensive Layout Elasticity when text is scaled (Zero clipping / zero overflow) */
+html.text-size-medium body {
+  line-height: 1.75 !important;
+  word-spacing: 0.02em !important;
+}
+
+html.text-size-large body {
+  line-height: 1.82 !important;
+  word-spacing: 0.04em !important;
+}
+
+html.text-size-xlarge body {
+  line-height: 1.88 !important;
+  word-spacing: 0.05em !important;
+  letter-spacing: 0.01em !important;
+}
+
+html.text-size-medium button,
+html.text-size-medium a[role="button"],
+html.text-size-large button,
+html.text-size-large a[role="button"],
+html.text-size-xlarge button,
+html.text-size-xlarge a[role="button"] {
+  min-height: 44px;
+}
+
+html.text-size-large button,
+html.text-size-large a[role="button"],
+html.text-size-xlarge button,
+html.text-size-xlarge a[role="button"] {
+  min-height: 48px;
+  padding-top: 0.65rem !important;
+  padding-bottom: 0.65rem !important;
+}
+
+/* Optically adapt giant headlines in large/xlarge mode to avoid breaking bounds */
+html.text-size-large h1,
+html.text-size-xlarge h1 {
+  font-size: clamp(2.2rem, 6.5vw, 6.2rem) !important;
+  line-height: 1.15 !important;
+}
+
+html.text-size-large h2,
+html.text-size-xlarge h2 {
+  font-size: clamp(1.8rem, 4.5vw, 3.2rem) !important;
+  line-height: 1.25 !important;
+}
+
+/* Relax line clamping when enlarged to prevent cutting off text */
+html.text-size-medium .line-clamp-2,
+html.text-size-large .line-clamp-2,
+html.text-size-xlarge .line-clamp-2 {
+  -webkit-line-clamp: 4 !important;
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  overflow: visible !important;
+}
+
+html.text-size-medium .line-clamp-1,
+html.text-size-large .line-clamp-1,
+html.text-size-xlarge .line-clamp-1 {
+  -webkit-line-clamp: 2 !important;
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  overflow: visible !important;
+}
+
+/* Elastic grid fallback for 3-column matrices on large text */
+@media (min-width: 1024px) {
+  html.text-size-large .lg\:grid-cols-3,
+  html.text-size-xlarge .lg\:grid-cols-3 {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
+  }
+}
+
+/* Immersive Focus Storytelling Mode: Pure Reading Sanctuary */
+html.focus-reading-mode #bg-canvas-layer,
+html.focus-reading-mode .ambient-particle-canvas {
+  opacity: 0.12 !important;
+  filter: blur(12px) !important;
+  transition: opacity 0.5s ease, filter 0.5s ease;
+}
+
+html.focus-reading-mode .theatrical-glow-plane {
+  opacity: 0.06 !important;
+  transition: opacity 0.5s ease;
+}
+
+/* High-Visibility Keyboard Focus Rings */
+:focus-visible {
+  outline: 3px solid #f59e0b !important;
+  outline-offset: 3px !important;
+}
+
+/* Custom Sleek Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -165,3 +1010,376 @@ button, [role="button"] {
 ::-webkit-scrollbar-thumb:hover {
   background: #8c2d2d;
 }
+
+/* ==========================================================================
+   Rendering Performance & Layout Containment Optimizations
+   ========================================================================== */
+
+/* Defer layout and painting calculations for below-the-fold heavy sections */
+#script-quotes,
+#music-showcase,
+#tickets,
+#venue {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 750px;
+}
+
+/* Accessibility & Keyboard Navigation: Instantly restore full rendering on focus to prevent jump glitches */
+#script-quotes:focus-within,
+#music-showcase:focus-within,
+#tickets:focus-within,
+#venue:focus-within {
+  content-visibility: visible !important;
+}
+
+/* ==========================================================================
+   WCAG 2.1 / 2.2 AA & Taiwan MoD Accessibility Bypass Standards (Skip Links)
+   ========================================================================== */
+.skip-link {
+  position: fixed;
+  top: -9999px;
+  left: -9999px;
+  z-index: 9999;
+  padding: 8px 16px;
+  background-color: #f59e0b;
+  color: #121215;
+  font-weight: 700;
+  font-size: 13px;
+  border-radius: 0 0 8px 8px;
+  border: 2px solid #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  text-decoration: none;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  top: 8px;
+  left: 8px;
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Senior & Elder Friendly Mode (銀髮長輩尊榮閱讀與低眩光防誤觸模式)
+   ========================================================================== */
+html.senior-friendly-mode {
+  --theme-text-primary: #ffffff !important;
+  --theme-text-secondary: #f4f4f5 !important;
+  --theme-text-muted: #e4e4e7 !important;
+  --theme-card-bg: #141210 !important;
+  --theme-card-border: rgba(245, 158, 11, 0.7) !important;
+  --theme-spotlight-beam: transparent !important;
+}
+
+html.senior-friendly-mode body {
+  font-size: 130% !important;
+  line-height: 1.88 !important;
+  letter-spacing: 0.02em !important;
+  word-spacing: 0.06em !important;
+}
+
+/* Ensure touch targets for elders are at least 48x48px */
+html.senior-friendly-mode button,
+html.senior-friendly-mode a[role="button"],
+html.senior-friendly-mode input,
+html.senior-friendly-mode select {
+  min-height: 48px !important;
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
+
+/* Calm, non-shaking layout for elders */
+html.senior-friendly-mode * {
+  animation-duration: 0.01ms !important;
+  transition-duration: 0.15s !important;
+}
+
+html.senior-friendly-mode .cursor-follow-glow,
+html.senior-friendly-mode .theatrical-glow-plane {
+  display: none !important;
+}
+
+/* Light mode variant for senior friendly mode */
+html.light.senior-friendly-mode {
+  --theme-bg-main: #fcf9f2 !important;
+  --theme-bg-canvas: #f5eedf !important;
+  --theme-text-primary: #12100e !important;
+  --theme-text-secondary: #27221d !important;
+  --theme-text-muted: #4a4239 !important;
+  --theme-card-bg: #ffffff !important;
+  --theme-card-border: rgba(140, 45, 45, 0.45) !important;
+}
+
+/* ==========================================================================
+   Cinematic Theatrical Flare & Masterclass Royal Velvet Drapery
+   ========================================================================== */
+/* Cinema-Grade Optical Film Grain & True Anamorphic Lens Flare Suite */
+.theatrical-film-grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grainFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grainFilter)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+/* Chiseled Gilt Typography Finish */
+.text-chiseled-gold {
+  background: linear-gradient(180deg, #ffffff 0%, #faebd7 28%, #dfba73 68%, #b38b42 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.7)) drop-shadow(0 0 24px rgba(212, 178, 111, 0.28));
+}
+
+html.light .text-chiseled-gold {
+  background: linear-gradient(180deg, #141210 0%, #292524 45%, #44403c 85%, #57534e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 1px 2px rgba(44, 34, 25, 0.12));
+}
+
+@keyframes cinematicFlarePass {
+  0% {
+    left: -140%;
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0.9;
+  }
+  100% {
+    left: 160%;
+    opacity: 0;
+  }
+}
+
+.cinematic-flare-wrapper {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+}
+
+.cinematic-flare-wrapper::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -140%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(212, 178, 111, 0.08) 20%,
+    rgba(255, 235, 180, 0.5) 42%,
+    rgba(255, 255, 255, 0.95) 50%,
+    rgba(255, 235, 180, 0.5) 58%,
+    rgba(212, 178, 111, 0.08) 80%,
+    transparent 100%
+  );
+  transform: skewX(-24deg);
+  pointer-events: none;
+  animation: cinematicFlarePass 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: var(--flare-delay, 1.2s);
+  mix-blend-mode: screen;
+  filter: blur(0.5px);
+}
+
+/* Light mode gilt leaf reflection for flare */
+html.light .cinematic-flare-wrapper::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(156, 111, 40, 0.12) 20%,
+    rgba(212, 167, 70, 0.55) 45%,
+    rgba(255, 255, 255, 0.9) 50%,
+    rgba(212, 167, 70, 0.55) 55%,
+    rgba(156, 111, 40, 0.12) 80%,
+    transparent 100%
+  );
+  mix-blend-mode: hard-light;
+  filter: blur(0.3px);
+}
+
+/* Masterclass French Royal Velvet Curtain - Left Side */
+.theatrical-velvet-left {
+  background-color: #2b080f;
+  background-image: 
+    /* Layer 1: Ambient Stage Light Falloff (Top/Bottom occlusion + center spotlight wash) */
+    linear-gradient(
+      180deg,
+      rgba(10, 2, 4, 0.85) 0%,
+      rgba(20, 4, 8, 0.4) 15%,
+      rgba(130, 25, 40, 0.25) 50%,
+      rgba(20, 4, 8, 0.5) 85%,
+      rgba(10, 2, 4, 0.95) 100%
+    ),
+    /* Layer 2: Ultra-Smooth Sinusoidal Pleat Shadows (Organic 140px wave without harsh lines) */
+    repeating-linear-gradient(
+      90deg,
+      #130206 0px,
+      #28070d 20px,
+      #5c111e 48px,
+      #8c1e30 70px,
+      #5c111e 92px,
+      #28070d 120px,
+      #130206 140px
+    );
+  box-shadow: 
+    inset -25px 0 60px rgba(0, 0, 0, 0.92),
+    inset 0 -40px 80px rgba(0, 0, 0, 0.85),
+    inset 0 30px 50px rgba(0, 0, 0, 0.7);
+}
+
+/* Masterclass French Royal Velvet Curtain - Right Side */
+.theatrical-velvet-right {
+  background-color: #2b080f;
+  background-image: 
+    linear-gradient(
+      180deg,
+      rgba(10, 2, 4, 0.85) 0%,
+      rgba(20, 4, 8, 0.4) 15%,
+      rgba(130, 25, 40, 0.25) 50%,
+      rgba(20, 4, 8, 0.5) 85%,
+      rgba(10, 2, 4, 0.95) 100%
+    ),
+    repeating-linear-gradient(
+      90deg,
+      #130206 0px,
+      #28070d 20px,
+      #5c111e 48px,
+      #8c1e30 70px,
+      #5c111e 92px,
+      #28070d 120px,
+      #130206 140px
+    );
+  box-shadow: 
+    inset 25px 0 60px rgba(0, 0, 0, 0.92),
+    inset 0 -40px 80px rgba(0, 0, 0, 0.85),
+    inset 0 30px 50px rgba(0, 0, 0, 0.7);
+}
+
+/* Ornate French Gold Bullion Fringe & Braided Border */
+.gold-bullion-fringe {
+  background-image: repeating-linear-gradient(
+    90deg,
+    #8f6b28 0px,
+    #d4af37 3px,
+    #fef1b6 5px,
+    #d4af37 7px,
+    #5f4314 9px,
+    #8f6b28 10px
+  );
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.65);
+}
+
+.gold-damask-trim {
+  background: linear-gradient(
+    180deg,
+    #f7e2a9 0%,
+    #d4af37 25%,
+    #8f6b28 50%,
+    #d4af37 75%,
+    #fef1b6 100%
+  );
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.35);
+}
+
+/* -------------------------------------------------------------
+ * 2026 Multi-Device Responsive Ergonomics: Mobile, Tablet & Desktop
+ * ------------------------------------------------------------- */
+
+/* Safe area padding for notch and bottom home indicator on iOS/Android */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 1rem);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0.5rem);
+}
+.pl-safe {
+  padding-left: env(safe-area-inset-left, 0px);
+}
+.pr-safe {
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* Responsive Modal Max-Height adapting to dynamic viewport height (dvh) */
+.modal-responsive-dvh {
+  max-height: calc(100dvh - 3rem);
+  max-height: calc(100vh - 3rem);
+}
+
+@media (max-width: 640px) {
+  .modal-responsive-dvh {
+    max-height: calc(100dvh - 1.5rem);
+    max-height: calc(100vh - 1.5rem);
+  }
+}
+
+/* Touch optimization: Eliminate 300ms tap delay & improve responsiveness */
+button, 
+a, 
+input, 
+select, 
+textarea,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+/* -------------------------------------------------------------
+ * Theatrical Touch Ergonomics: Subtle Scale-Down Micro-Interaction
+ * ------------------------------------------------------------- */
+@media (hover: none), (pointer: coarse) {
+  /* Mobile / Touch Specific Micro-Interaction */
+  button:not(:disabled):active,
+  [role="button"]:not([aria-disabled="true"]):active,
+  .active-scale-down:active {
+    transform: scale(0.965) translateZ(0);
+    transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.4, 1);
+  }
+
+  a:not([aria-disabled="true"]):active {
+    opacity: 0.85;
+    transform: scale(0.975) translateZ(0);
+    transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.4, 1), opacity 0.08s ease;
+  }
+
+  /* Interactive Cards: Cast, Photo Rehearsals, Story Manuscripts */
+  .smoked-card:not([aria-disabled="true"]):active,
+  .theatrical-card:not([aria-disabled="true"]):active,
+  .interactive-card:active {
+    transform: scale(0.985) translateZ(0);
+    filter: brightness(1.05);
+    transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.4, 1), filter 0.1s ease;
+  }
+}
+
+/* Universal Subtle Tactile Feedback for all pointer types */
+button:not(:disabled):active,
+[role="button"]:not([aria-disabled="true"]):active {
+  transform: scale(0.97) translateZ(0);
+  transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.4, 1);
+}
+
+.smoked-card:not([aria-disabled="true"]):active {
+  transform: scale(0.988) translateZ(0);
+  transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.4, 1);
+}
+
+/* Responsive Custom Scrollbar for touch & mouse */
+@media (hover: hover) and (pointer: fine) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgba(18, 18, 21, 0.6);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(212, 178, 111, 0.25);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 178, 111, 0.5);
+  }
+}
+
+
+

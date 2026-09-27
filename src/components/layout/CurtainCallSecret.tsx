@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { Sparkles, Heart, Music, Quote, Award, RefreshCw } from 'lucide-react';
+import React, { useState, memo } from 'react';
+import { Sparkles, Heart, Quote, Award, RefreshCw, Gamepad2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ambientSynth } from '../../utils/audioSynth';
 
 interface CurtainCallSecretProps {
   onOpenAiLounge?: () => void;
   onOpenChronicle?: () => void;
+  onOpenGame?: () => void;
 }
 
 const LES_MIS_EASTER_QUOTES = [
@@ -41,9 +42,10 @@ const LES_MIS_EASTER_QUOTES = [
   }
 ];
 
-export const CurtainCallSecret: React.FC<CurtainCallSecretProps> = ({
+export const CurtainCallSecret: React.FC<CurtainCallSecretProps> = memo(({
   onOpenAiLounge,
-  onOpenChronicle
+  onOpenChronicle,
+  onOpenGame,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [quoteIndex, setQuoteIndex] = useState(0);
@@ -166,6 +168,19 @@ export const CurtainCallSecret: React.FC<CurtainCallSecretProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2 text-xs">
+                  {onOpenGame && (
+                    <button
+                      onClick={() => {
+                        ambientSynth.playButtonClickSFX();
+                        onOpenGame();
+                      }}
+                      className="px-2.5 py-1.5 bg-gradient-to-r from-amber-600/30 to-amber-500/20 hover:from-amber-600/50 hover:to-amber-500/40 text-amber-200 border border-amber-500/40 rounded transition-all flex items-center gap-1.5 font-serif-tc shadow-xs group"
+                      title="啟動隱藏小遊戲：尚萬強大逃亡"
+                    >
+                      <Gamepad2 className="w-3.5 h-3.5 text-amber-400 group-hover:rotate-12 transition-transform" />
+                      <span className="font-bold">🎮 逃亡 24601</span>
+                    </button>
+                  )}
                   {onOpenAiLounge && (
                     <button
                       onClick={() => {
@@ -202,4 +217,7 @@ export const CurtainCallSecret: React.FC<CurtainCallSecretProps> = ({
       </div>
     </div>
   );
-};
+});
+
+CurtainCallSecret.displayName = 'CurtainCallSecret';
+

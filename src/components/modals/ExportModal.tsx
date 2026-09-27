@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Copy, Check, Download, FileCode, Upload, RefreshCw, Share2, ShieldCheck, Link2 } from 'lucide-react';
+import { X, Copy, Check, Download, FileCode, Upload, Share2, ShieldCheck, Link2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { CastMember, RehearsalPhoto } from '../../types';
+import { CastMember, RehearsalPhoto, MusicalTrack } from '../../types';
 import {
   createSafeUtf8JsonBlob,
   createSafeUtf8TextBlob,
   readUploadedJsonFile,
   safeEncodeSharePayload,
-  safeDecodeSharePayload,
   sanitizeObjectToUtf8,
 } from '../../utils/textEncoding';
 
@@ -17,7 +16,8 @@ interface ExportModalProps {
   onClose: () => void;
   castMembers: CastMember[];
   rehearsalPhotos: RehearsalPhoto[];
-  onImportData?: (castMembers: CastMember[], rehearsalPhotos: RehearsalPhoto[]) => void;
+  tracks?: MusicalTrack[];
+  onImportData?: (castMembers: CastMember[], rehearsalPhotos: RehearsalPhoto[], tracks?: MusicalTrack[]) => void;
 }
 
 export const ExportModal: React.FC<ExportModalProps> = ({
@@ -25,6 +25,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   onClose,
   castMembers,
   rehearsalPhotos,
+  tracks,
   onImportData,
 }) => {
   const [copied, setCopied] = useState(false);
@@ -36,16 +37,23 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   // Strict UTF-8 sanitized data structures
   const cleanCast = sanitizeObjectToUtf8(castMembers);
   const cleanPhotos = sanitizeObjectToUtf8(rehearsalPhotos);
+  const cleanTracks = tracks ? sanitizeObjectToUtf8(tracks) : undefined;
 
-  const formattedTS = `// 您自訂匯出的演職人員名單與照片資料 (可貼回 src/data/showData.ts)
+  const formattedTS = `// 您自訂匯出的演職人員名單、照片與曲目資料 (可貼回 src/data/showData.ts)
 // UTF-8 标准字符集编码
 export const CAST_MEMBERS = ${JSON.stringify(cleanCast, null, 2)};
 
 export const REHEARSAL_PHOTOS = ${JSON.stringify(cleanPhotos, null, 2)};
-`;
+${cleanTracks ? `\nexport const MUSICAL_TRACKS = ${JSON.stringify(cleanTracks, null, 2)};\n` : ''}`;
+
+  const exportPayloadObj = {
+    castMembers: cleanCast,
+    rehearsalPhotos: cleanPhotos,
+    ...(cleanTracks ? { tracks: cleanTracks } : {}),
+  };
 
   const handleCopy = () => {
-    const textToCopy = activeTab === 'export-ts' ? formattedTS : JSON.stringify({ castMembers: cleanCast, rehearsalPhotos: cleanPhotos }, null, 2);
+    const textToCopy = activeTab === 'export-ts' ? formattedTS : JSON.stringify(exportPayloadObj, null, 2);
     navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -57,13 +65,13 @@ export const REHEARSAL_PHOTOS = ${JSON.stringify(cleanPhotos, null, 2)};
     if (activeTab === 'export-ts') {
       blob = createSafeUtf8TextBlob(formattedTS);
     } else {
-      blob = createSafeUtf8JsonBlob({ castMembers: cleanCast, rehearsalPhotos: cleanPhotos });
+      blob = createSafeUtf8JsonBlob(exportPayloadObj);
     }
 
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `tcsh_les_mis_roster_${new Date().toISOString().slice(0, 10)}.${activeTab === 'export-ts' ? 'ts' : 'json'}`;
+    a.download = `tcsh_les_mis_data_${new Date().toISOString().slice(0, 10)}.${activeTab === 'export-ts' ? 'ts' : 'json'}`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -71,7 +79,7 @@ export const REHEARSAL_PHOTOS = ${JSON.stringify(cleanPhotos, null, 2)};
   // Generate URL with safe encoded payload using encodeURIComponent
   const generateShareLink = () => {
     try {
-      const payload = safeEncodeSharePayload({ castMembers: cleanCast, rehearsalPhotos: cleanPhotos });
+      const payload = safeEncodeSharePayload(exportPayloadObj);
       const currentUrl = new URL(window.location.href);
       currentUrl.searchParams.set('roster_data', payload);
       return currentUrl.toString();
@@ -94,20 +102,22 @@ export const REHEARSAL_PHOTOS = ${JSON.stringify(cleanPhotos, null, 2)};
     setImportError('');
     try {
       const parsed = await readUploadedJsonFile(file);
-      if (parsed && (Array.isArray(parsed.castMembers) || Array.isArray(parsed.rehearsalPhotos))) {
+      if (parsed && (Array.isArray(parsed.castMembers) || Array.isArray(parsed.rehearsalPhotos) || Array.isArray(parsed.tracks))) {
         const newCast = parsed.castMembers || castMembers;
         const newPhotos = parsed.rehearsalPhotos || rehearsalPhotos;
+        const newTracks = parsed.tracks || tracks;
         if (onImportData) {
-          onImportData(newCast, newPhotos);
+          onImportData(newCast, newPhotos, newTracks);
         }
-        setImportStatus(`成功以 UTF-8 格式匯入 ${newCast.length} 位演職人員與 ${newPhotos.length} 張排練相片！已徹底消除亂碼。`);
+        setImportStatus(`成功以 UTF-8 格式匯入 ${newCast.length} 位演職人員、${newPhotos.length} 張排練相片${newTracks ? ` 與 ${newTracks.length} 首曲目音檔` : ''}！`);
       } else {
-        setImportError('JSON 格式不符：必須包含 castMembers 或 rehearsalPhotos 陣列');
+        setImportError('JSON 格式不符：必須包含 castMembers, rehearsalPhotos 或 tracks 陣列');
       }
     } catch (err: any) {
       setImportError(err?.message || '無法解析 JSON 檔案，請確認檔案為標準 UTF-8 編碼');
     }
   };
+
 
   return createPortal(
     <AnimatePresence>

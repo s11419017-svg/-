@@ -1,8 +1,34 @@
-import { CastMember, RehearsalPhoto, PlayQuote } from '../types';
+import { CastMember, RehearsalPhoto, PlayQuote, MusicalTrack, ShowGeneralConfig } from '../types';
 
 import lesMisPosterImg from '../assets/images/les_mis_poster_1785560972972.jpg';
 import rehearsalBw1Img from '../assets/images/rehearsal_bw_1_1785560986462.jpg';
 import manuscriptImg from '../assets/images/manuscript_page_1785561004666.jpg';
+
+export const DEFAULT_SHOW_GENERAL_CONFIG: ShowGeneralConfig = {
+  titleZh: '悲慘世界',
+  titleEn: 'Les Misérables',
+  subhead: '2026 慈大附中高二知足班（雙語班）表演英文公演｜English Drama Production',
+  schoolName: '慈濟大學實驗高級中學 (慈大附中)',
+  gradeName: '高二知足班（雙語班）演職團隊',
+  eventDateIso: '2026-12-19T19:00:00',
+  eventDateFormatted: '2026 年 12 月 19 日 (星期五)',
+  doorTime: '18:30 開放入場',
+  showTime: '19:00 正式開演',
+  venueName: '慈濟大學中央校區 大愛樓3樓演藝廳',
+  venueAddress: '花蓮縣花蓮市中央路三段701號 (大愛樓 3F)',
+  admissionFee: '免費憑實體門票入場（門票可於合作地點索取或學生親送發放）',
+  ticketStatus: 'open',
+  ticketButtonText: '免費索票登記 (Free Admission)',
+  ticketUrl: 'https://forms.gle/tcsh-lesmis-2026',
+  ticketNotice: '一人一票，憑實體邀請函或電子登記 QR Code 入座。開演後將實施遲到管制，請提前 15 分鐘入席。',
+  ticketReleaseDate: '2026 年 11 月 01 日 中午 12:00 正式開放',
+  heroTagline: '即便是最黑暗的長夜終將結束，太陽必將升起。',
+  heroTaglineEn: 'Even the darkest night will end and the sun will rise.',
+  heroLeadText: '由慈濟大學實驗高級中學高二知足雙語班全體師生傾力呈現，結合十九世紀法國歷史風雲、全英文經典劇讀與現場聲學重現。',
+  parkingGuide: '校內備有地下停車場與機車停車棚，現場由慈中志工協助指引停放。',
+  accessibilitySupport: '演藝廳備有無障礙電梯與專用輪椅席位，如有長輩或特殊需求，歡迎洽詢前台引導組。',
+  contactInfo: '慈大附中雙語教學組 (03) 857-2823 分機 123',
+};
 
 export const SHOW_DETAILS = {
   title: 'Les Misérables',
@@ -247,3 +273,77 @@ export const FAQS = [
     a: '全劇含中場休息約為 120 分鐘。18:30 開始驗票入場，19:00 正式開演。'
   }
 ];
+
+export const MUSICAL_TRACKS: MusicalTrack[] = [
+  {
+    id: 'people-sing',
+    titleEn: 'Do You Hear the People Sing?',
+    titleZh: '你可聽見人民的歌聲',
+    character: 'Enjolras & Students (安喬拉與革命青年)',
+    performer: '高二知足雙語班公演群戲大合唱',
+    tempo: 'March / Anthem (四四拍戰歌昂揚)',
+    desc: '《悲慘世界》最著名的革命進行曲，象徵對自由與尊嚴的不屈追求。在本次公演中，由高二知足雙語班全體演員共同獻唱，氣勢恢弘。',
+    lyricsEn: "Do you hear the people sing? Singing a song of angry men? It is the music of a people who will not be slaves again!",
+    lyricsZh: "你可聽見人民的歌聲？那是屬於不屈者的昂揚之歌。那是絕不再甘為奴隸的人民，發自靈魂深處的吼聲！",
+    spotifyUrl: 'https://open.spotify.com/search/Do%20You%20Hear%20the%20People%20Sing%20Les%20Miserables',
+    appleMusicUrl: 'https://music.apple.com/us/search?term=Do+You+Hear+the+People+Sing+Les+Miserables',
+    youtubeUrl: 'https://www.youtube.com/results?search_query=Do+You+Hear+the+People+Sing+Les+Miserables+Official+Soundtrack'
+  },
+  {
+    id: 'dreamed-a-dream',
+    titleEn: 'I Dreamed a Dream',
+    titleZh: '我曾有夢',
+    character: 'Fantine (芳婷)',
+    performer: '林思涵 同學獨唱',
+    tempo: 'Lyrical Ballad (抒情悲歌)',
+    desc: '芳婷在苦難命運中的經典獨唱，細緻刻畫對美好生活的眷戀與現實折磨下的絕望，音域寬廣，極富情感渲染力。',
+    lyricsEn: "I dreamed that love would never die, I dreamed that God would be forgiving... But there are dreams that cannot be, and there are storms we cannot weather.",
+    lyricsZh: "我曾夢想愛情永遠不會凋零，我曾夢想上帝滿懷寬恕... 但有些夢想注定無法實現，有些風暴我們無法抵擋。",
+    spotifyUrl: 'https://open.spotify.com/search/I%20Dreamed%20a%20Dream%20Les%20Miserables',
+    appleMusicUrl: 'https://music.apple.com/us/search?term=I+Dreamed+a+Dream+Les+Miserables',
+    youtubeUrl: 'https://www.youtube.com/results?search_query=I+Dreamed+a+Dream+Les+Miserables+Official+Soundtrack'
+  },
+  {
+    id: 'bring-him-home',
+    titleEn: 'Bring Him Home',
+    titleZh: '帶他回家',
+    character: 'Jean Valjean (尚萬強)',
+    performer: '游承翰 同學獨唱',
+    tempo: 'Sacred Prayer (虔誠高音祈禱曲)',
+    desc: '尚萬強在街壘決戰前夜，向上帝為年輕的馬禮斯祈求平安的崇高禱告曲。高音極為飄逸深情。',
+    lyricsEn: "God on high, hear my prayer. In my need you have always been there. He is young, he's just a boy... Bring him home.",
+    lyricsZh: "至高無上的上帝，請傾聽我的禱告。在我最困頓之刻您從未離去。他還年輕，他只是一個孩子... 請帶他平安回家。",
+    spotifyUrl: 'https://open.spotify.com/search/Bring%20Him%20Home%20Les%20Miserables',
+    appleMusicUrl: 'https://music.apple.com/us/search?term=Bring+Him+Home+Les+Miserables',
+    youtubeUrl: 'https://www.youtube.com/results?search_query=Bring+Him+Home+Les+Miserables+Official+Soundtrack'
+  },
+  {
+    id: 'stars',
+    titleEn: 'Stars',
+    titleZh: '繁星',
+    character: 'Inspector Javert (賈維爾)',
+    performer: '陳奕霖 同學獨唱',
+    tempo: 'Staccato Anthem (堅毅威嚴)',
+    desc: '賈維爾督察在巴黎夜空繁星下宣誓的獨白曲，將律法與星辰運行相提並論，展現對絕對正義與追捕的狂熱信仰。',
+    lyricsEn: "There out in the darkness, a fugitive running, fallen from God... Lord let me find him, that I may see him safe behind bars!",
+    lyricsZh: "在那漫漫夜色深處，逃犯正狂奔逃竄，偏離了神的正道... 主啊，求您讓我找到他，親眼看見他深鎖於鐵窗之後！",
+    spotifyUrl: 'https://open.spotify.com/search/Stars%20Javert%20Les%20Miserables',
+    appleMusicUrl: 'https://music.apple.com/us/search?term=Stars+Javert+Les+Miserables',
+    youtubeUrl: 'https://www.youtube.com/results?search_query=Stars+Javert+Les+Miserables+Official+Soundtrack'
+  },
+  {
+    id: 'one-day-more',
+    titleEn: 'One Day More',
+    titleZh: '明日再臨',
+    character: 'Ensemble (全體主要角色重唱)',
+    performer: '高二知足雙語班第一幕終曲大合唱',
+    tempo: 'Polyphonic March (多聲部重唱進行曲)',
+    desc: '第一幕終曲最為震撼的多聲部交織重唱，尚萬強、賈維爾、馬禮斯、珂賽特、愛波妮、安喬拉與泰納第夫婦各自唱出命運交會前的最後心聲。',
+    lyricsEn: "One day more! Another day, another destiny! This never-ending road to Calvary; These men who seem to know my crime will surely come again...",
+    lyricsZh: "明日再臨！新的一天，全新的宿命！這條通往受難地的漫漫長路；那些深知我過去的人，明日必定會再度襲來...",
+    spotifyUrl: 'https://open.spotify.com/search/One%20Day%20More%20Les%20Miserables',
+    appleMusicUrl: 'https://music.apple.com/us/search?term=One+Day+More+Les+Miserables',
+    youtubeUrl: 'https://www.youtube.com/results?search_query=One+Day+More+Les+Miserables+Official+Soundtrack'
+  }
+];
+
