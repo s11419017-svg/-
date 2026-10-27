@@ -258,6 +258,8 @@ const AppContent: React.FC = memo(() => {
   }, [announce]);
 
   useEffect(() => {
+    if (!isSoundscapeOn) return;
+
     let ticking = false;
     const handleScroll = () => {
       if (!ticking) {
@@ -270,9 +272,11 @@ const AppContent: React.FC = memo(() => {
         ticking = true;
       }
     };
+
     window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isSoundscapeOn]);
 
   const handleOpenGame = useCallback(() => {
     ambientSynth.playButtonClickSFX();

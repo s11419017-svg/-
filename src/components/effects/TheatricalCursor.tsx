@@ -192,6 +192,13 @@ export const TheatricalCursor: React.FC<TheatricalCursorProps> = memo(({
         }
       }
 
+      const idleMs = performance.now() - lastActiveTime;
+      const nearTarget = Math.abs(mouseX - reticleX) < 0.15 && Math.abs(mouseY - reticleY) < 0.15;
+      if (!isMouseDown && idleMs > 140 && nearTarget) {
+        isStationary = true;
+        return;
+      }
+
       animationFrameId = requestAnimationFrame(render);
     };
 
@@ -275,4 +282,3 @@ export const TheatricalCursor: React.FC<TheatricalCursorProps> = memo(({
 });
 
 TheatricalCursor.displayName = 'TheatricalCursor';
-
