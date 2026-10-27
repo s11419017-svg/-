@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
 export type TextSizeMode = 'normal' | 'medium' | 'large' | 'xlarge';
 
@@ -38,7 +38,6 @@ interface AccessibilityContextType extends AccessibilitySettings {
   isSideDockExpanded: boolean;
   setIsSideDockExpanded: (val: boolean) => void;
   toggleSideDock: () => void;
-  announcement: string;
   announce: (message: string) => void;
 }
 
@@ -370,37 +369,65 @@ export const AccessibilityProvider: React.FC<{ children: React.ReactNode }> = ({
   const closeResearchModal = useCallback(() => setIsResearchModalOpen(false), []);
   const toggleSideDock = useCallback(() => setIsSideDockExpanded((prev) => !prev), []);
 
+  const value = useMemo<AccessibilityContextType>(
+    () => ({
+      ...settings,
+      setSpotlightIntensity,
+      setSpotlightRadiusScale,
+      setUseTheatricalCursor,
+      setReduceMotion,
+      setHighContrast,
+      setTextSize,
+      setFocusReadingMode,
+      setAccessibilityFriendlyMode,
+      toggleAccessibilityFriendlyMode,
+      setSeniorFriendlyMode,
+      toggleSeniorFriendlyMode,
+      toggleSpotlight,
+      stepTextSize,
+      resetToDefaults,
+      isSettingsOpen,
+      openSettings,
+      closeSettings,
+      isResearchModalOpen,
+      openResearchModal,
+      closeResearchModal,
+      isSideDockExpanded,
+      setIsSideDockExpanded,
+      toggleSideDock,
+      announce,
+    }),
+    [
+      settings,
+      setSpotlightIntensity,
+      setSpotlightRadiusScale,
+      setUseTheatricalCursor,
+      setReduceMotion,
+      setHighContrast,
+      setTextSize,
+      setFocusReadingMode,
+      setAccessibilityFriendlyMode,
+      toggleAccessibilityFriendlyMode,
+      setSeniorFriendlyMode,
+      toggleSeniorFriendlyMode,
+      toggleSpotlight,
+      stepTextSize,
+      resetToDefaults,
+      isSettingsOpen,
+      openSettings,
+      closeSettings,
+      isResearchModalOpen,
+      openResearchModal,
+      closeResearchModal,
+      isSideDockExpanded,
+      setIsSideDockExpanded,
+      toggleSideDock,
+      announce,
+    ]
+  );
+
   return (
-    <AccessibilityContext.Provider
-      value={{
-        ...settings,
-        setSpotlightIntensity,
-        setSpotlightRadiusScale,
-        setUseTheatricalCursor,
-        setReduceMotion,
-        setHighContrast,
-        setTextSize,
-        setFocusReadingMode,
-        setAccessibilityFriendlyMode,
-        toggleAccessibilityFriendlyMode,
-        setSeniorFriendlyMode,
-        toggleSeniorFriendlyMode,
-        toggleSpotlight,
-        stepTextSize,
-        resetToDefaults,
-        isSettingsOpen,
-        openSettings,
-        closeSettings,
-        isResearchModalOpen,
-        openResearchModal,
-        closeResearchModal,
-        isSideDockExpanded,
-        setIsSideDockExpanded,
-        toggleSideDock,
-        announcement,
-        announce,
-      }}
-    >
+    <AccessibilityContext.Provider value={value}>
       {children}
       {/* Screen Reader Live Region for WCAG Announcements */}
       <div
